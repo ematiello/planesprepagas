@@ -10,7 +10,7 @@ export const site = {
   name: 'Planes Prepagas',
 
   /** TODO: razón social inscripta, para los textos legales. */
-  legalName: 'Planes Prepagas S.R.L.',
+  legalName: 'planesprepagas.com.ar',
 
   tagline: 'Asesores en medicina prepaga. Te ayudamos a elegir la cobertura y gestionamos el alta.',
 

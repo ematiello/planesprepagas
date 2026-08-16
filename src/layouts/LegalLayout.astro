@@ -20,20 +20,6 @@ const { title, description, lastUpdated } = Astro.props;
 
   <section class="section">
     <div class="container-page">
-      {/*
-        Aviso al equipo, no al visitante: estos textos son una base redactada
-        para el sitio, no un dictamen. Deben ser revisados por un profesional
-        antes de publicar. Borrar este bloque cuando la revisión esté hecha.
-      */}
-      <div
-        role="note"
-        class="mb-10 rounded-lg border border-amber-brand/50 bg-amber-brand/10 px-4 py-3 text-sm leading-relaxed text-ink"
-      >
-        <strong class="font-display font-bold">Texto pendiente de revisión legal.</strong>
-        Este contenido es una base de trabajo y no reemplaza el asesoramiento de un
-        profesional. Debe ser revisado y adaptado antes de la publicación del sitio.
-      </div>
-
       <div class="legal-body prose-measure flex flex-col gap-4 text-sm leading-relaxed text-ink-muted">
         <slot />
       </div>
