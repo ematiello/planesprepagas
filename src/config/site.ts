@@ -4,6 +4,8 @@
  * Todo lo marcado con TODO son PLACEHOLDERS: cambiarlos acá y el sitio entero
  * queda actualizado (header, footer, legales, links de WhatsApp, JSON-LD,
  * títulos SEO). No hardcodear ninguno de estos valores en los componentes.
+ *
+ * [Test deploy automático: 2026-08-16 13:35]
  */
 
 export const site = {
