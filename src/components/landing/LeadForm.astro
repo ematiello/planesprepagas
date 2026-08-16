@@ -1,0 +1,276 @@
+---
+import { site } from '@/config/site';
+import { PROVINCES } from '@/lib/provinces';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+
+/**
+ * Formulario de captación de la landing.
+ *
+ * Cuatro campos y nada más: cada campo extra baja la conversión, y estos cuatro
+ * son los que efectivamente cambian qué plan corresponde recomendar. El resto
+ * se pregunta en la conversación de WhatsApp, que ya está abierta.
+ *
+ * A diferencia de `PlanInterestForm`, este adjunta el origen de campaña al
+ * mensaje y notifica la conversión a Meta y Google Ads.
+ */
+interface Props {
+  companyName: string;
+  whatsappNumber: string;
+  planOptions: string[];
+  /** Estilo del bloque: en el hero va sobre fondo oscuro. */
+  variant?: 'hero' | 'section';
+  id?: string;
+  /** Encabezado. Por defecto pide la cuota, que es lo que trae al visitante. */
+  heading?: string;
+}
+
+const {
+  companyName,
+  whatsappNumber,
+  planOptions,
+  variant = 'section',
+  id = 'consultar',
+  heading = `Pedí tu cuota de ${Astro.props.companyName}`,
+} = Astro.props;
+
+const { googleAdsId, googleAdsLabel } = site.tracking;
+// Google Ads necesita ID y etiqueta juntos; con uno solo no registra nada.
+const googleAdsSendTo = googleAdsId && googleAdsLabel ? `${googleAdsId}/${googleAdsLabel}` : '';
+
+const isHero = variant === 'hero';
+---
+
+<section
+  id={id}
+  class:list={[
+    'rounded-xl p-6 md:p-7',
+    isHero ? 'bg-white shadow-2xl' : 'card',
+  ]}
+  data-lead-form
+  data-company={companyName}
+  data-phone={whatsappNumber}
+  data-google-ads-send-to={googleAdsSendTo}
+>
+  <h2 class="font-display text-xl font-extrabold text-navy-900 md:text-2xl">
+    {heading}
+  </h2>
+  <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+    Completá tus datos y te pasamos el valor y la cobertura que aplican a tu caso.
+    {site.phones.hours}.
+  </p>
+
+  <form class="mt-5 grid gap-4" novalidate data-form>
+    <div class="flex flex-col gap-1.5">
+      <label for={`${id}-name`} class="text-sm font-semibold text-ink">
+        Nombre y apellido <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <input
+        id={`${id}-name`}
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      />
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="name"></p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for={`${id}-phone`} class="text-sm font-semibold text-ink">
+        Teléfono <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <input
+        id={`${id}-phone`}
+        name="phone"
+        type="tel"
+        required
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="11 5555 5555"
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      />
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="phone"></p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label for={`${id}-province`} class="text-sm font-semibold text-ink">
+          Provincia <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+        </label>
+        <select
+          id={`${id}-province`}
+          name="province"
+          required
+          class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+        >
+          <option value="">Elegí una</option>
+          {PROVINCES.map((province) => <option value={province}>{province}</option>)}
+        </select>
+        <p class="hidden text-xs font-semibold text-red-700" data-error-for="province"></p>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for={`${id}-coverage`} class="text-sm font-semibold text-ink">
+          ¿Para quién? <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+        </label>
+        <select
+          id={`${id}-coverage`}
+          name="coverage"
+          required
+          class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+        >
+          <option value="">Elegí una</option>
+          <option value="Individual">Solo para mí</option>
+          <option value="Pareja">Pareja</option>
+          <option value="Grupo familiar">Grupo familiar</option>
+          <option value="Empresa">Mi empresa</option>
+        </select>
+        <p class="hidden text-xs font-semibold text-red-700" data-error-for="coverage"></p>
+      </div>
+    </div>
+
+    {/* Oculto pero enviado: permite que un CTA de un plan puntual prellene el interés. */}
+    <input type="hidden" name="plan" value="" data-plan-field />
+
+    <label class="flex items-start gap-2.5 text-xs leading-relaxed text-ink-muted">
+      <input
+        id={`${id}-consent`}
+        name="consent"
+        type="checkbox"
+        required
+        class="mt-0.5 h-4 w-4 shrink-0 rounded border-hairline"
+      />
+      <span>
+        Acepto la{' '}
+        <a href="/legales/privacidad" class="font-semibold text-navy-900 underline underline-offset-2">
+          política de privacidad
+        </a>{' '}
+        y que me contacten por WhatsApp para asesorarme.
+        <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </span>
+    </label>
+    <p class="-mt-2 hidden text-xs font-semibold text-red-700" data-error-for="consent"></p>
+
+    <button type="submit" class="btn btn-whatsapp w-full">
+      <WhatsAppIcon />
+      Quiero mi cuota
+    </button>
+
+    <p class="text-center text-xs text-ink-muted">
+      Se abre WhatsApp con tu consulta ya escrita. Consultar no tiene costo ni compromiso.
+    </p>
+
+    <p class="hidden text-sm font-semibold text-navy-900" role="status" aria-live="polite" data-status></p>
+  </form>
+</section>
+
+<script>
+  import { captureCampaign, campaignSummary, trackLead } from '@/lib/campaign-client';
+
+  // Se guarda apenas carga la página: si el visitante navega dentro de la
+  // landing, la URL pierde los parámetros y el origen quedaría sin registrar.
+  const campaign = captureCampaign();
+
+  const messages: Record<string, string> = {
+    name: 'Escribí tu nombre y apellido.',
+    phone: 'Escribí un teléfono de contacto (al menos 8 dígitos).',
+    province: 'Elegí tu provincia.',
+    coverage: 'Indicá para quién es la cobertura.',
+    consent: 'Necesitamos tu conformidad para poder contactarte.',
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-lead-form]').forEach((section) => {
+    const form = section.querySelector<HTMLFormElement>('[data-form]');
+    const status = section.querySelector<HTMLElement>('[data-status]');
+    if (!form || !status) return;
+
+    const companyName = section.dataset.company ?? '';
+    const phone = section.dataset.phone ?? '';
+    const googleAdsSendTo = section.dataset.googleAdsSendTo || undefined;
+
+    const clearErrors = () => {
+      form.querySelectorAll<HTMLElement>('[data-error-for]').forEach((slot) => {
+        slot.textContent = '';
+        slot.classList.add('hidden');
+      });
+      form
+        .querySelectorAll('[aria-invalid]')
+        .forEach((field) => field.removeAttribute('aria-invalid'));
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearErrors();
+
+      const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
+      const rawPhone = String(data.get('phone') ?? '').trim();
+      const province = String(data.get('province') ?? '');
+      const coverage = String(data.get('coverage') ?? '');
+      const plan = String(data.get('plan') ?? '').trim();
+      const consent = data.get('consent') === 'on';
+
+      // Cuenta solo dígitos: así "11 5555-5555" y "+54 11 5555 5555" pasan igual.
+      const invalid: string[] = [];
+      if (!name) invalid.push('name');
+      if (rawPhone.replace(/\D/g, '').length < 8) invalid.push('phone');
+      if (!province) invalid.push('province');
+      if (!coverage) invalid.push('coverage');
+      if (!consent) invalid.push('consent');
+
+      if (invalid.length > 0) {
+        invalid.forEach((field) => {
+          const slot = form.querySelector<HTMLElement>(`[data-error-for="${field}"]`);
+          const input = form.querySelector<HTMLElement>(`[name="${field}"]`);
+          input?.setAttribute('aria-invalid', 'true');
+          if (slot) {
+            slot.textContent = messages[field];
+            slot.classList.remove('hidden');
+          }
+        });
+        status.textContent = 'Revisá los campos marcados para poder continuar.';
+        status.classList.remove('hidden');
+        form.querySelector<HTMLElement>(`[name="${invalid[0]}"]`)?.focus();
+        return;
+      }
+
+      // Coincide con el CTA que el visitante tocó: si el mensaje que se abre
+      // dice otra cosa, la conversación arranca con una desconexión.
+      const greeting = plan
+        ? `¡Hola! Quiero pedir la cuota del ${plan} de ${companyName}.`
+        : `¡Hola! Quiero pedir una cuota de ${companyName}.`;
+
+      // El origen va al final para que lo primero que lea el asesor sea la consulta.
+      const lines = [
+        greeting,
+        '',
+        `Nombre: ${name}`,
+        `Teléfono: ${rawPhone}`,
+        `Provincia: ${province}`,
+        `Cobertura: ${coverage}`,
+      ];
+      const origin = campaignSummary(campaign);
+      if (origin) lines.push('', origin);
+
+      const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
+        lines.join('\n'),
+      )}`;
+
+      trackLead({ company: companyName, plan: plan || undefined, googleAdsSendTo });
+
+      status.textContent = 'Abriendo WhatsApp con tu consulta…';
+      status.classList.remove('hidden');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  });
+
+  // Los CTA de cada plan prellenan el interés y llevan al formulario.
+  document.querySelectorAll<HTMLElement>('[data-plan-cta]').forEach((cta) => {
+    cta.addEventListener('click', () => {
+      const plan = cta.dataset.planCta ?? '';
+      document
+        .querySelectorAll<HTMLInputElement>('[data-plan-field]')
+        .forEach((field) => (field.value = plan));
+    });
+  });
+</script>

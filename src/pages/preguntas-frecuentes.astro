@@ -1,0 +1,139 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const categories = (await getCollection('faq')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const allItems = categories.flatMap((category) => category.data.items);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: allItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+};
+---
+
+<BaseLayout
+  title="Preguntas frecuentes"
+  description="Cómo funciona contratar un plan de medicina prepaga con nosotros: costos, requisitos, afiliación, prestadores, pagos y bajas."
+  schema={schema}
+>
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-16 md:py-20">
+      <h1 class="max-w-3xl text-4xl md:text-5xl">Preguntas frecuentes</h1>
+      <p class="prose-measure mt-4 text-lg leading-relaxed text-navy-100/85">
+        Las consultas que más nos hacen sobre cómo trabajamos, cómo es el alta y qué
+        cubre cada plan.
+      </p>
+
+      <div class="mt-8 max-w-xl">
+        <label for="faq-search" class="block text-sm font-semibold text-navy-100">
+          Buscar una pregunta
+        </label>
+        <input
+          id="faq-search"
+          type="search"
+          placeholder="Ej.: monotributista, carencia, baja…"
+          autocomplete="off"
+          class="mt-2 w-full rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-navy-100/50"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page max-w-3xl">
+      <p id="faq-status" role="status" aria-live="polite" class="mb-6 text-sm text-ink-muted">
+        {allItems.length} preguntas disponibles.
+      </p>
+
+      <div class="flex flex-col gap-10">
+        {
+          categories.map((category) => (
+            <section data-category class="flex flex-col gap-3">
+              <h2 class="font-display text-xl font-extrabold text-navy-900">
+                {category.data.category}
+              </h2>
+
+              {category.data.items.map((item) => (
+                <details
+                  class="card group px-5 py-4"
+                  data-question={item.question.toLowerCase()}
+                  data-answer={item.answer.toLowerCase()}
+                >
+                  <summary class="flex cursor-pointer list-none items-start justify-between gap-4 font-display text-base font-bold text-ink">
+                    <span>{item.question}</span>
+                    <svg
+                      class="mt-1 h-5 w-5 shrink-0 text-ink-muted transition-transform group-open:rotate-45"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 4v12M4 10h12" stroke-linecap="round" />
+                    </svg>
+                  </summary>
+                  <p class="mt-3 text-sm leading-relaxed text-ink-muted">{item.answer}</p>
+                </details>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+
+      <p
+        id="faq-empty"
+        class="hidden rounded-lg border border-hairline bg-surface p-6 text-sm leading-relaxed text-ink-muted"
+      >
+        No encontramos preguntas con ese término. Probá con otra palabra o escribinos por
+        WhatsApp y te respondemos directamente.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const search = document.getElementById('faq-search') as HTMLInputElement | null;
+  const items = document.querySelectorAll<HTMLDetailsElement>('details[data-question]');
+  const sections = document.querySelectorAll<HTMLElement>('[data-category]');
+  const status = document.getElementById('faq-status');
+  const empty = document.getElementById('faq-empty');
+
+  search?.addEventListener('input', () => {
+    const term = search.value.trim().toLowerCase();
+    let visible = 0;
+
+    items.forEach((item) => {
+      const haystack = `${item.dataset.question ?? ''} ${item.dataset.answer ?? ''}`;
+      const matches = term === '' || haystack.includes(term);
+      item.classList.toggle('hidden', !matches);
+      // Abrir el resultado al filtrar ahorra un clic; al limpiar, se cierra.
+      item.open = matches && term !== '';
+      if (matches) visible += 1;
+    });
+
+    // Oculta el título de una categoría que quedó sin resultados visibles.
+    sections.forEach((section) => {
+      const hasVisible = section.querySelector('details:not(.hidden)') !== null;
+      section.classList.toggle('hidden', !hasVisible);
+    });
+
+    if (status) {
+      status.textContent =
+        term === ''
+          ? `${items.length} preguntas disponibles.`
+          : visible === 1
+            ? '1 pregunta encontrada.'
+            : `${visible} preguntas encontradas.`;
+    }
+
+    empty?.classList.toggle('hidden', visible > 0);
+  });
+</script>

@@ -1,0 +1,102 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { site } from '@/config/site';
+---
+
+<LegalLayout
+  title="Términos y condiciones del sitio"
+  description="Condiciones de uso del sitio web, alcance de la información publicada y limitaciones de responsabilidad."
+  lastUpdated="Febrero de 2026"
+>
+  <h2>Aceptación</h2>
+  <p>
+    El uso de este sitio implica la aceptación de estos términos. Si no estás de acuerdo
+    con ellos, te pedimos que no lo utilices.
+  </p>
+
+  <h2>Titular del sitio</h2>
+  <p>
+    <strong>{site.legalName}</strong> ({site.name}). La atención es exclusivamente a
+    distancia; el canal de contacto es{' '}
+    <a href={`mailto:${site.email}`}>{site.email}</a> y el teléfono{' '}
+    {site.phones.sales.label}.
+  </p>
+
+  <h2>Objeto y alcance</h2>
+  <p>
+    Este sitio tiene finalidad informativa y de contacto. Presenta los planes de medicina
+    prepaga de las compañías que representamos y canaliza consultas. {site.name} es un
+    intermediario independiente y no forma parte de ninguna de ellas.
+  </p>
+  <p>
+    El contenido <strong>no constituye una oferta contractual</strong> ni asegura la
+    disponibilidad, el precio o la aceptación de ninguna cobertura. La contratación se
+    perfecciona con la compañía que presta el servicio, conforme a su propia
+    documentación. La prestación del servicio de salud, la red de prestadores, la
+    autorización de prácticas y la atención al asociado son responsabilidad de esa
+    compañía.
+  </p>
+
+  <h2>Exactitud de la información</h2>
+  <p>
+    Procuramos mantener la información actualizada, pero los planes, beneficios y
+    condiciones los define y modifica cada compañía. Pueden existir diferencias entre lo
+    publicado acá y las condiciones vigentes; en ese caso, prevalece siempre la
+    documentación oficial de la compañía.
+  </p>
+
+  <h2>Uso permitido</h2>
+  <ul>
+    <li>Está permitido navegar el sitio y usar sus formularios de contacto.</li>
+    <li>
+      No está permitido el uso automatizado que degrade el servicio, ni la extracción
+      masiva de contenido con fines comerciales.
+    </li>
+    <li>
+      No está permitido utilizar el sitio para fines ilícitos ni para suplantar la
+      identidad de terceros.
+    </li>
+  </ul>
+
+  <h2>Propiedad intelectual</h2>
+  <p>
+    Los textos, el diseño y el código de este sitio pertenecen a {site.legalName}. Las
+    marcas y denominaciones de las compañías citadas pertenecen a sus respectivos
+    titulares y se usan con fines identificatorios.
+  </p>
+
+  <h2>Enlaces a terceros</h2>
+  <p>
+    El sitio puede enlazar a servicios de terceros sobre cuyo contenido no tenemos
+    control. Su inclusión no implica respaldo de nuestra parte.
+  </p>
+
+  <h2>Limitación de responsabilidad</h2>
+  <p>
+    No respondemos por interrupciones del servicio, ni por los daños derivados de
+    decisiones tomadas exclusivamente sobre la base de la información orientativa
+    publicada, sin haber verificado las condiciones definitivas con la compañía.
+  </p>
+  <p>
+    Nada de lo aquí dispuesto limita los derechos que las normas de defensa del consumidor
+    reconocen de manera imperativa.
+  </p>
+
+  <h2>Modificaciones</h2>
+  <p>
+    Podemos actualizar estos términos. La versión vigente es la publicada en esta página,
+    con su fecha de última actualización.
+  </p>
+
+  <h2>Ley aplicable</h2>
+  <p>
+    Estos términos se rigen por las leyes de la República Argentina. Para cualquier
+    controversia serán competentes los tribunales ordinarios que correspondan según la
+    normativa de defensa del consumidor aplicable.
+  </p>
+
+  <h2>Contacto</h2>
+  <p>
+    Consultas sobre estos términos: <a href={`mailto:${site.email}`}>{site.email}</a>.
+  </p>
+</LegalLayout>

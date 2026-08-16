@@ -1,0 +1,63 @@
+---
+import { getEntry, type CollectionEntry } from 'astro:content';
+import CompanyBadge from '@/components/shared/CompanyBadge.astro';
+
+interface Props {
+  plan: CollectionEntry<'plans'>;
+}
+
+const { plan } = Astro.props;
+
+// La referencia está validada en build, así que si el archivo del plan apunta a
+// una compañía inexistente el sitio no compila — el badge nunca queda vacío.
+const company = await getEntry(plan.data.company);
+if (!company) {
+  throw new Error(`El plan "${plan.id}" referencia una compañía inexistente.`);
+}
+---
+
+<article
+  class="card group flex h-full flex-col p-6 hover:-translate-y-1 hover:shadow-lg"
+  data-company={company.id}
+>
+  {/* Franja de color de la compañía: identificación instantánea al escanear el grid. */}
+  <span
+    class="mb-5 block h-1 w-12 rounded-full"
+    style={`background-color: ${company.data.brandColor}`}
+    aria-hidden="true"></span>
+
+  <CompanyBadge
+    name={company.data.name}
+    brandColor={company.data.brandColor}
+    class="self-start"
+  />
+
+  <h3 class="mt-4 font-display text-xl font-extrabold text-navy-900">
+    <a href={`/planes/${plan.id}`} class="after:absolute after:inset-0">
+      {plan.data.name}
+    </a>
+  </h3>
+
+  <p class="mt-1.5 font-display text-sm font-bold text-ink">{plan.data.tagline}</p>
+
+  <p class="mt-3 text-sm leading-relaxed text-ink-muted">{plan.data.summary}</p>
+
+  <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-ink-muted">
+    Ideal para
+  </p>
+  <p class="text-sm text-ink">{plan.data.audience}</p>
+
+  <div class="mt-6 flex-1"></div>
+
+  <span class="btn btn-outline w-full group-hover:bg-navy-900 group-hover:text-white">
+    Ver el plan
+  </span>
+</article>
+
+<style>
+  /* La tarjeta entera es clickeable vía el ::after del link del título, pero
+     solo el título recibe foco: un único stop de teclado por tarjeta. */
+  article {
+    position: relative;
+  }
+</style>

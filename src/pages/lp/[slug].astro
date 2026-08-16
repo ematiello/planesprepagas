@@ -1,0 +1,333 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import CompanyLogo from '@/components/shared/CompanyLogo.astro';
+import LeadForm from '@/components/landing/LeadForm.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { contactFor } from '@/lib/contact';
+import { buildWhatsAppLink, companyEnquiryMessage } from '@/lib/whatsapp';
+
+/**
+ * Landing de campaña, una por compañía. Recibe el tráfico de Meta y Google Ads.
+ *
+ * Se genera desde la misma colección que el resto del sitio: cuando entre una
+ * compañía nueva, su landing existe sin escribir código.
+ */
+export const getStaticPaths = (async () => {
+  const companies = await getCollection('companies');
+  return companies.map((company) => ({ params: { slug: company.id }, props: { company } }));
+}) satisfies GetStaticPaths;
+
+const { company } = Astro.props;
+
+const plans = (await getCollection('plans', ({ data }) => data.company.id === company.id)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const contact = contactFor(company);
+const whatsappHref = buildWhatsAppLink(
+  companyEnquiryMessage(company.data.name),
+  contact.whatsappNumber,
+);
+const planNames = plans.map((plan) => plan.data.name);
+
+/* Beneficios de la cobertura, no de nuestro servicio: en tráfico frío el
+   visitante todavía no sabe qué es Avalian, y menos quiénes somos nosotros. */
+const trustPoints = [
+  `Red de prestadores en todo el país, con cartilla según el plan que elijas.`,
+  'Planes para individuos, grupo familiar, monotributistas y empresas.',
+  'Podés derivar los aportes de tu obra social y reducir la cuota mensual.',
+  'Te acompañamos en todo el trámite de alta, sin cargo sobre la cuota.',
+];
+
+const steps = [
+  {
+    title: 'Dejás tus datos',
+    body: 'Cuatro campos y listo. Se abre WhatsApp con tu consulta ya escrita.',
+  },
+  {
+    title: 'Recibís tu cuota',
+    body: `Te pasamos el valor según tu edad, tu grupo familiar y el plan de ${company.data.name} que mejor encaje.`,
+  },
+  {
+    title: 'Te asociás',
+    body: 'Preparamos la documentación y seguimos el trámite hasta que la cobertura esté activa.',
+  },
+];
+
+/*
+ * FAQ de objeciones sobre la cobertura, no sobre nosotros. La última pregunta
+ * es la que identifica al comercializador: va acá, y no en el encabezado,
+ * porque a esa altura el visitante ya entendió qué está contratando.
+ */
+const faq = [
+  {
+    q: '¿Cuánto sale la cuota?',
+    a: `Depende del plan, de tu edad y de la composición del grupo familiar. Dejanos tus datos y te pasamos el valor exacto de los planes de ${company.data.name} que apliquen a tu caso, sin compromiso.`,
+  },
+  {
+    q: '¿Puedo derivar los aportes de mi obra social?',
+    a: 'En la mayoría de los casos sí, si estás en relación de dependencia o sos monotributista con obra social. La derivación reduce la cuota final; el trámite y los plazos dependen de tu situación registral.',
+  },
+  {
+    q: '¿Desde cuándo puedo usar la cobertura?',
+    a: 'Habitualmente desde la fecha de alta que confirma la compañía. Algunas prestaciones tienen períodos de carencia y las condiciones preexistentes se evalúan a partir de la declaración jurada de salud.',
+  },
+  {
+    q: '¿Pago más por asociarme desde acá?',
+    a: `No. La cuota es la que fija ${company.data.name} según el plan, la edad y el grupo familiar. Asociarte con nuestra gestión no agrega recargos ni honorarios.`,
+  },
+  {
+    q: `¿Quién presta la cobertura?`,
+    a: `${company.data.name}. Nosotros somos ${site.name}, su comercializador autorizado: te asesoramos y gestionamos el alta, pero la atención médica y el contrato son con ${company.data.name}.`,
+  },
+];
+---
+
+<LandingLayout
+  title={`Planes de ${company.data.name} — Pedí tu cuota`}
+  description={`Cobertura médica ${company.data.name}: conocé los planes disponibles, pedí tu cuota según tu grupo familiar y asociate con acompañamiento en todo el trámite.`}
+  companyName={company.data.name}
+>
+  {/*
+    Encabezado con la marca del producto al frente y el vendedor identificado en
+    bajada. Es el patrón del concesionario oficial: la marca vende, pero queda
+    claro quién es el comercializador.
+
+    La bajada no es decorativa — Meta y Google Ads suspenden cuentas por
+    tergiversación cuando el destino aparenta ser el sitio oficial de la marca.
+  */}
+  <header class="border-b border-hairline bg-white">
+    <div class="container-page flex items-center justify-between gap-4 py-3">
+      <span class="flex items-center gap-3">
+        <CompanyLogo company={company} height={34} decorative eager />
+        <span class="hidden text-[0.7rem] leading-tight text-ink-muted sm:block">
+          Comercializado por<br />
+          <strong class="font-semibold text-ink">{site.name}</strong>
+        </span>
+      </span>
+      <a
+        href={contact.phone.href}
+        class="font-display text-sm font-bold text-navy-900 hover:text-amber-brand-dark"
+      >
+        {contact.phone.label}
+      </a>
+    </div>
+  </header>
+
+  <section class="relative overflow-hidden bg-navy-900 text-white">
+    <div
+      class="pointer-events-none absolute inset-0 opacity-[0.07]"
+      style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 28px 28px;"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div
+      class="container-page relative grid gap-10 py-12 md:py-16 lg:grid-cols-[1.05fr_26rem] lg:items-start lg:gap-14"
+    >
+      <div>
+        <CompanyLogo company={company} height={46} onDark decorative eager />
+
+        <h1 class="mt-6 text-3xl leading-[1.12] md:text-5xl">
+          Cobertura médica {company.data.name} para vos y tu familia
+        </h1>
+        <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
+          {company.data.summary} Conocé los {plans.length} planes disponibles, pedí tu cuota
+          y asociate con acompañamiento en todo el trámite.
+        </p>
+
+        <ul class="mt-7 flex flex-col gap-3">
+          {
+            trustPoints.map((point) => (
+              <li class="flex items-start gap-3 text-sm leading-relaxed text-navy-100/90">
+                <svg
+                  class="mt-0.5 h-5 w-5 shrink-0 text-amber-brand"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 011.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{point}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-whatsapp mt-8 lg:hidden"
+          data-analytics="whatsapp-lp-hero"
+        >
+          <WhatsAppIcon />
+          Consultar por WhatsApp
+        </a>
+      </div>
+
+      {/* El formulario entra en pantalla sin scrollear: es el único objetivo de la página. */}
+      <LeadForm
+        companyName={company.data.name}
+        whatsappNumber={contact.whatsappNumber}
+        planOptions={planNames}
+        variant="hero"
+        id="consultar"
+      />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      <h2 class="text-center text-3xl md:text-4xl">
+        {plans.length === 1
+          ? `El plan de ${company.data.name}`
+          : `Los ${plans.length} planes de ${company.data.name}`}
+      </h2>
+      <p class="mx-auto mt-3 max-w-2xl text-center text-base leading-relaxed text-ink-muted">
+        La diferencia no es "más caro o más barato": cambia la cartilla, el esquema de
+        copagos y los beneficios que vas a usar seguido.
+      </p>
+
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          plans.map((plan) => (
+            <article class="card flex h-full flex-col p-6">
+              <span
+                class="mb-5 block h-1 w-12 rounded-full"
+                style={`background-color: ${company.data.brandColor}`}
+                aria-hidden="true"
+              />
+              <h3 class="font-display text-xl font-extrabold text-navy-900">
+                {plan.data.name}
+              </h3>
+              <p class="mt-1.5 font-display text-sm font-bold text-ink">{plan.data.tagline}</p>
+              <p class="mt-3 text-sm leading-relaxed text-ink-muted">{plan.data.summary}</p>
+
+              <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                Ideal para
+              </p>
+              <p class="text-sm text-ink">{plan.data.audience}</p>
+
+              <ul class="mt-5 flex flex-col gap-2">
+                {plan.data.benefits.slice(0, 4).map((benefit) => (
+                  <li class="flex items-start gap-2 text-sm leading-relaxed text-ink">
+                    <svg
+                      class="mt-1 h-4 w-4 shrink-0 text-amber-brand-dark"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 011.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div class="flex-1" />
+
+              {/* Prellena el plan en el formulario en vez de sacar al visitante de la página. */}
+              <a
+                href="#consultar"
+                class="btn btn-primary mt-6 w-full"
+                data-plan-cta={plan.data.name}
+              >
+                Pedir cuota de este plan
+              </a>
+            </article>
+          ))
+        }
+      </div>
+
+      <p class="mt-8 text-center text-xs leading-relaxed text-ink-muted">
+        Los beneficios listados son orientativos y no reemplazan la documentación oficial
+        vigente de {company.data.name}. Las condiciones, carencias y valores definitivos
+        son los del contrato de la compañía.
+      </p>
+    </div>
+  </section>
+
+  <section class="border-y border-hairline bg-canvas py-14 md:py-20">
+    <div class="container-page">
+      <h2 class="text-center text-3xl md:text-4xl">
+        Cómo asociarte a {company.data.name}
+      </h2>
+      <ol class="mx-auto mt-10 grid max-w-4xl gap-8 md:grid-cols-3">
+        {
+          steps.map((step, index) => (
+            <li class="flex flex-col items-center gap-3 text-center">
+              <span
+                class="grid h-11 w-11 place-items-center rounded-full bg-navy-900 font-display text-base font-extrabold text-amber-brand"
+                aria-hidden="true"
+              >
+                {index + 1}
+              </span>
+              <h3 class="font-display text-lg font-extrabold text-navy-900">{step.title}</h3>
+              <p class="text-sm leading-relaxed text-ink-muted">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1fr_26rem] lg:items-start">
+      <div>
+        <h2 class="text-3xl md:text-4xl">Preguntas sobre {company.data.name}</h2>
+        <div class="mt-8 flex flex-col divide-y divide-hairline border-y border-hairline">
+          {
+            faq.map((item) => (
+              <details class="group py-4">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-base font-bold text-navy-900">
+                  {item.q}
+                  <span
+                    class="shrink-0 text-amber-brand-dark transition group-open:rotate-45"
+                    aria-hidden="true"
+                  >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9 4h2v12H9z" />
+                      <path d="M4 9h12v2H4z" />
+                    </svg>
+                  </span>
+                </summary>
+                <p class="prose-measure mt-3 text-sm leading-relaxed text-ink-muted">
+                  {item.a}
+                </p>
+              </details>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* Segunda instancia del formulario: quien llegó hasta acá no debería tener que volver arriba. */}
+      <LeadForm
+        companyName={company.data.name}
+        whatsappNumber={contact.whatsappNumber}
+        planOptions={planNames}
+        id="consultar-pie"
+      />
+    </div>
+  </section>
+
+  {/* Barra fija solo en mobile: el formulario del hero ya quedó fuera de pantalla. */}
+  <div
+    class="sticky bottom-0 z-40 border-t border-hairline bg-white/95 p-3 backdrop-blur lg:hidden"
+  >
+    <a href="#consultar" class="btn btn-primary w-full">
+      Pedir mi cuota de {company.data.name}
+    </a>
+  </div>
+</LandingLayout>

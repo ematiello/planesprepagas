@@ -1,0 +1,138 @@
+---
+import { site, mainNav, topBarNav } from '@/config/site';
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+
+// Iniciales del nombre comercial: derivarlas evita que el monograma quede
+// desfasado si la marca cambia de nombre.
+const monogram = site.name
+  .split(/\s+/)
+  .map((word) => word[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
+---
+
+<header class="sticky top-0 z-40 border-b border-hairline bg-surface/95 backdrop-blur">
+  {/* Barra superior angosta: links de baja prioridad, oculta en mobile. */}
+  <div class="hidden bg-navy-900 text-navy-100 md:block">
+    <div class="container-page flex items-center justify-end gap-6 py-2 text-xs">
+      {
+        topBarNav.map((item) => (
+          <a href={item.href} class="transition hover:text-white">
+            {item.label}
+          </a>
+        ))
+      }
+      <span aria-hidden="true" class="text-navy-700">|</span>
+      <a href={`mailto:${site.email}`} class="transition hover:text-white">
+        {site.email}
+      </a>
+      <a href={site.phones.sales.href} class="font-semibold transition hover:text-white">
+        {site.phones.sales.label}
+      </a>
+    </div>
+  </div>
+
+  <div class="container-page flex items-center justify-between gap-4 py-4">
+    <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} — Inicio`}>
+      {/* Marca provisoria: monograma tipográfico hasta que exista un logo real. */}
+      <span
+        class="grid h-10 w-10 place-items-center rounded-lg bg-navy-900 font-display text-base font-extrabold text-white"
+        aria-hidden="true">{monogram}</span
+      >
+      <span class="leading-tight">
+        <span class="block font-display text-lg font-extrabold text-navy-900"
+          >{site.name}</span
+        >
+        <span class="block text-[0.65rem] uppercase tracking-[0.18em] text-ink-muted"
+          >Asesores en medicina prepaga</span
+        >
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-7 lg:flex" aria-label="Navegación principal">
+      {
+        mainNav.map((item) => (
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+            class:list={[
+              'text-sm font-semibold transition hover:text-navy-900',
+              isActive(item.href)
+                ? 'text-navy-900 underline decoration-amber-brand decoration-2 underline-offset-8'
+                : 'text-ink-muted',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="/planes" class="btn btn-primary hidden sm:inline-flex">Ver planes</a>
+
+      <button
+        type="button"
+        id="nav-toggle"
+        class="grid h-10 w-10 place-items-center rounded-lg border border-hairline text-navy-900 lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        <span class="sr-only">Abrir menú</span>
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="mobile-nav"
+    class="hidden border-t border-hairline bg-surface lg:hidden"
+    aria-label="Navegación principal (móvil)"
+  >
+    <ul class="container-page flex flex-col py-2">
+      {
+        [...mainNav, ...topBarNav].map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+              class="block border-b border-hairline py-3 text-sm font-semibold text-ink last:border-b-0"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      <li class="py-3 sm:hidden">
+        <a href="/planes" class="btn btn-primary w-full">Ver planes</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('mobile-nav');
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+    menu?.classList.toggle('hidden', isOpen);
+  });
+
+  // Escape cierra el menú y devuelve el foco al botón: sin esto el usuario de
+  // teclado queda navegando un menú abierto que visualmente no puede cerrar.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (toggle?.getAttribute('aria-expanded') !== 'true') return;
+    toggle.setAttribute('aria-expanded', 'false');
+    menu?.classList.add('hidden');
+    toggle.focus();
+  });
+</script>

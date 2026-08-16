@@ -1,0 +1,35 @@
+---
+/**
+ * Aviso de contenido ilustrativo.
+ *
+ * Se muestra mientras existan planes con `verified: false`. Publicar coberturas
+ * o beneficios sin confirmar contra la documentación oficial de la compañía es
+ * publicidad engañosa; este aviso es el reemplazo honesto hasta cargar los datos
+ * reales. Cuando todos los planes queden en `verified: true`, desaparece solo.
+ */
+interface Props {
+  count: number;
+  /**
+   * Compañía a la que pertenecen los planes sin verificar. Se pasa solo en las
+   * páginas de una compañía puntual; en los listados que mezclan varias se
+   * omite, y el aviso habla de "cada compañía".
+   */
+  companyName?: string;
+}
+const { count, companyName } = Astro.props;
+---
+
+{
+  count > 0 && (
+    <div
+      role="note"
+      class="rounded-lg border border-amber-brand/50 bg-amber-brand/10 px-4 py-3 text-sm leading-relaxed text-ink"
+    >
+      <strong class="font-display font-bold">Contenido de referencia.</strong> Los
+      beneficios listados son orientativos y todavía no fueron confirmados contra la
+      documentación oficial vigente de {companyName ?? 'cada compañía'}. Las condiciones,
+      carencias y valores definitivos son los del contrato de la compañía. Consultanos y
+      te pasamos el detalle actualizado.
+    </div>
+  )
+}

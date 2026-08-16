@@ -1,0 +1,175 @@
+---
+import '@/styles/global.css';
+import { site, legalNav } from '@/config/site';
+
+/**
+ * Layout de las landings de campaña. Difiere del BaseLayout a propósito:
+ *
+ * - **Sin header de navegación ni footer de links.** La landing recibe tráfico
+ *   pago con una intención única; cada link que no sea el CTA es una ruta de
+ *   escape que se paga y no convierte.
+ * - **`noindex`.** La página SEO de cada compañía es `/companias/[slug]`. Si
+ *   esta también se indexara, competirían por el mismo término y Google
+ *   repartiría la autoridad entre las dos.
+ * - **Píxeles de Meta y Google Ads**, que el resto del sitio no carga.
+ */
+interface Props {
+  title: string;
+  description: string;
+  /** Se usa en el aviso legal del pie, que sí es obligatorio. */
+  companyName: string;
+}
+
+const { title, description, companyName } = Astro.props;
+
+const { metaPixelId, googleAdsId } = site.tracking;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Sin canonical y con noindex: la versión indexable es /companias/[slug]. */}
+    <meta name="robots" content="noindex, follow" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+
+    {
+      site.analyticsId && (
+        <>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${site.analyticsId}`}
+          />
+          <script is:inline define:vars={{ analyticsId: site.analyticsId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', analyticsId);
+          </script>
+        </>
+      )
+    }
+
+    {/*
+      Google Ads puede ir sin GA4: si no hay analyticsId, este bloque trae su
+      propio gtag.js. Si ya se cargó arriba, solo agrega el config.
+    */}
+    {
+      googleAdsId && (
+        <>
+          {!site.analyticsId && (
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`} />
+          )}
+          <script is:inline define:vars={{ googleAdsId }}>
+            window.dataLayer = window.dataLayer || [];
+            if (!window.gtag) {
+              function gtag() {
+                window.dataLayer.push(arguments);
+              }
+              window.gtag = gtag;
+              gtag('js', new Date());
+            }
+            window.gtag('config', googleAdsId);
+          </script>
+        </>
+      )
+    }
+
+    {
+      metaPixelId && (
+        <script is:inline define:vars={{ metaPixelId }}>
+          !(function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
+              n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+          })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+          window.fbq('init', metaPixelId);
+          window.fbq('track', 'PageView');
+        </script>
+      )
+    }
+  </head>
+
+  <body class="flex min-h-screen flex-col bg-surface">
+    <a
+      href="#contenido"
+      class="sr-only rounded-lg focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-navy-900 focus:px-4 focus:py-2 focus:text-white"
+    >
+      Saltar al contenido
+    </a>
+
+    <main id="contenido" class="flex-1">
+      <slot />
+    </main>
+
+    {/*
+      Pie mínimo. No lleva navegación, pero sí los legales: Meta y Google Ads
+      rechazan destinos sin política de privacidad accesible, y el descargo de
+      intermediación es lo que sostiene el uso de la marca ajena.
+    */}
+    <footer class="border-t border-hairline bg-canvas">
+      <div class="container-page flex flex-col gap-4 py-8">
+        <ul class="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+          {
+            legalNav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="text-ink-muted underline-offset-4 transition hover:text-navy-900 hover:underline"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a
+              href="/"
+              class="text-ink-muted underline-offset-4 transition hover:text-navy-900 hover:underline"
+            >
+              Sitio principal
+            </a>
+          </li>
+        </ul>
+
+        <p class="max-w-4xl text-xs leading-relaxed text-ink-muted">
+          {site.name} es un intermediario independiente y no forma parte de {companyName}.
+          Los planes exhibidos pertenecen a {companyName}, que es quien presta el servicio
+          de salud. Las condiciones, coberturas, carencias y valores definitivos son los
+          que establece el contrato de la compañía. {companyName} y su denominación
+          pertenecen a su titular y se citan con fines identificatorios.
+        </p>
+
+        <p class="text-xs text-ink-muted/80">
+          © {year} {site.legalName} — Todos los derechos reservados.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

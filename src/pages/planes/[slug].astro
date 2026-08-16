@@ -1,0 +1,141 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CompanyBadge from '@/components/shared/CompanyBadge.astro';
+import PlanInterestForm from '@/components/plans/PlanInterestForm.astro';
+import UnverifiedDataNotice from '@/components/shared/UnverifiedDataNotice.astro';
+import { site } from '@/config/site';
+import { contactFor } from '@/lib/contact';
+
+export const getStaticPaths = (async () => {
+  const plans = await getCollection('plans');
+  return plans.map((plan) => ({ params: { slug: plan.id }, props: { plan } }));
+}) satisfies GetStaticPaths;
+
+const { plan } = Astro.props;
+const company = await getEntry(plan.data.company);
+if (!company) {
+  throw new Error(`El plan "${plan.id}" referencia una compañía inexistente.`);
+}
+
+// La consulta de este plan va a la línea de su compañía, no a la general.
+const contact = contactFor(company);
+
+const { Content } = await render(plan);
+
+// provider = la compañía que realmente presta el servicio; seller = nosotros,
+// que comercializamos el plan. Es la misma distinción que hace el footer.
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `${plan.data.name} — ${company.data.name}`,
+  serviceType: 'Cobertura médica prepaga',
+  description: plan.data.seoDescription,
+  provider: {
+    '@type': 'Organization',
+    name: company.data.name,
+    url: company.data.website,
+  },
+  seller: {
+    '@type': 'Organization',
+    '@id': `${Astro.site}#organization`,
+    name: site.name,
+  },
+  areaServed: { '@type': 'Country', name: 'Argentina' },
+};
+---
+
+<BaseLayout
+  title={`${plan.data.name} de ${company.data.name}`}
+  description={plan.data.seoDescription}
+  schema={schema}
+>
+  <nav aria-label="Migas de pan" class="border-b border-hairline bg-surface">
+    <ol class="container-page flex flex-wrap gap-2 py-3 text-xs text-ink-muted">
+      <li><a href="/" class="hover:text-navy-900">Inicio</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href="/planes" class="hover:text-navy-900">Planes</a></li>
+      <li aria-hidden="true">/</li>
+      <li>
+        <a href={`/companias/${company.id}`} class="hover:text-navy-900">
+          {company.data.name}
+        </a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li class="font-semibold text-ink">{plan.data.name}</li>
+    </ol>
+  </nav>
+
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-14 md:py-20">
+      <CompanyBadge name={company.data.name} brandColor={company.data.brandColor} />
+      <h1 class="mt-4 max-w-3xl text-4xl md:text-5xl">{plan.data.name}</h1>
+      <p class="mt-3 font-display text-xl font-bold text-amber-brand">{plan.data.tagline}</p>
+      <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
+        {plan.data.summary}
+      </p>
+      <p class="mt-6 text-sm text-navy-100/70">
+        Plan provisto por <strong class="font-semibold text-white">{company.data.name}</strong>.
+        Gestionamos el alta y te acompañamos en el trámite.
+      </p>
+      <a href="#consultar" class="btn btn-primary mt-7">Consultar este plan</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-start">
+      <div>
+        {!plan.data.verified && <UnverifiedDataNotice count={1} companyName={company.data.name} />}
+
+        <h2 class="mt-8 font-display text-2xl font-extrabold text-navy-900">
+          Qué incluye
+        </h2>
+        <ul class="mt-5 flex flex-col gap-3">
+          {
+            plan.data.benefits.map((benefit) => (
+              <li class="flex items-start gap-3 text-sm leading-relaxed text-ink">
+                <svg
+                  class="mt-0.5 h-5 w-5 shrink-0 text-amber-brand-dark"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 011.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{benefit}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <div class="prose-measure mt-8 text-sm leading-relaxed text-ink-muted">
+          <Content />
+        </div>
+
+      </div>
+
+      <PlanInterestForm
+        planName={plan.data.name}
+        companyName={company.data.name}
+        whatsappNumber={contact.whatsappNumber}
+      />
+    </div>
+  </section>
+
+  <section class="border-t border-hairline bg-surface py-12">
+    <div class="container-page flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <p class="prose-measure text-sm leading-relaxed text-ink-muted">
+        ¿No estás seguro de que este sea el plan indicado? Comparalo con los otros planes
+        de {company.data.name} antes de decidir.
+      </p>
+      <a href={`/companias/${company.id}`} class="btn btn-outline shrink-0">
+        Ver todos los planes de {company.data.name}
+      </a>
+    </div>
+  </section>
+</BaseLayout>

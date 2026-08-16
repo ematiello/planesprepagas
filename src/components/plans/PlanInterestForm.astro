@@ -1,0 +1,285 @@
+---
+import { site } from '@/config/site';
+import { PROVINCES } from '@/lib/provinces';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+
+interface Props {
+  /** Plan que queda fijo en el mensaje. Se ignora si se pasan `planOptions`. */
+  planName?: string;
+  companyName: string;
+  /**
+   * Lista de planes entre los que elegir. Se usa en las páginas de compañía,
+   * donde el formulario cubre varios planes en vez de uno solo.
+   */
+  planOptions?: string[];
+  /**
+   * Línea a la que se manda la consulta. Cada compañía puede tener la suya, así
+   * que la página la resuelve con `contactFor()` y la pasa acá; sin esto el
+   * formulario mandaría todos los leads a la línea general.
+   */
+  whatsappNumber?: string;
+}
+
+const {
+  planName = '',
+  companyName,
+  planOptions,
+  whatsappNumber = site.whatsappNumber,
+} = Astro.props;
+const hasPlanChoice = (planOptions?.length ?? 0) > 0;
+
+---
+
+<section
+  id="consultar"
+  class="card p-6 md:p-8"
+  data-plan={planName}
+  data-company={companyName}
+  data-phone={whatsappNumber}
+>
+  <h2 class="font-display text-2xl font-extrabold text-navy-900">
+    {hasPlanChoice ? '¿Te interesa alguno de estos planes?' : '¿Te interesa este plan?'}
+  </h2>
+  <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+    Completá tus datos y se abre WhatsApp con la consulta ya escrita. Te respondemos en
+    horario comercial ({site.phones.hours}) y el asesoramiento no tiene costo.
+  </p>
+
+  <form id="plan-interest-form" class="mt-6 grid gap-5 md:grid-cols-2" novalidate>
+    {
+      hasPlanChoice && (
+        <div class="flex flex-col gap-1.5 md:col-span-2">
+          <label for="pif-plan" class="text-sm font-semibold text-ink">
+            Plan de interés <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+          </label>
+          <select
+            id="pif-plan"
+            name="plan"
+            required
+            class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+          >
+            <option value="">Elegí un plan</option>
+            {planOptions!.map((option) => (
+              <option value={option}>{option}</option>
+            ))}
+            <option value="Todavía no sé cuál">Todavía no sé cuál</option>
+          </select>
+          <p class="hidden text-xs font-semibold text-red-700" data-error-for="pif-plan" />
+        </div>
+      )
+    }
+
+    <div class="flex flex-col gap-1.5">
+      <label for="pif-name" class="text-sm font-semibold text-ink">
+        Nombre y apellido <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="pif-name"
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      />
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="pif-name"></p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="pif-phone" class="text-sm font-semibold text-ink">
+        Teléfono <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="pif-phone"
+        name="phone"
+        type="tel"
+        required
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="11 5555 5555"
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      />
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="pif-phone"></p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="pif-province" class="text-sm font-semibold text-ink">
+        Provincia <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <select
+        id="pif-province"
+        name="province"
+        required
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      >
+        <option value="">Elegí una provincia</option>
+        {PROVINCES.map((province) => <option value={province}>{province}</option>)}
+      </select>
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="pif-province"></p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="pif-coverage" class="text-sm font-semibold text-ink">
+        Tipo de cobertura <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+      </label>
+      <select
+        id="pif-coverage"
+        name="coverage"
+        required
+        class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+      >
+        <option value="">Elegí una opción</option>
+        <option value="Individual">Individual</option>
+        <option value="Grupo familiar">Grupo familiar</option>
+        <option value="Empresa">Empresa</option>
+      </select>
+      <p class="hidden text-xs font-semibold text-red-700" data-error-for="pif-coverage"></p>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="flex items-start gap-3 text-sm leading-relaxed text-ink-muted">
+        <input
+          id="pif-consent"
+          name="consent"
+          type="checkbox"
+          required
+          class="mt-1 h-4 w-4 shrink-0 rounded border-hairline"
+        />
+        <span>
+          Acepto la{' '}
+          <a href="/legales/privacidad" class="font-semibold text-navy-900 underline underline-offset-2">
+            política de privacidad
+          </a>{' '}
+          y que me contacten por WhatsApp para asesorarme
+          {hasPlanChoice ? ' sobre estos planes.' : ' sobre este plan.'}
+          <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+        </span>
+      </label>
+      <p class="mt-1 hidden text-xs font-semibold text-red-700" data-error-for="pif-consent"></p>
+    </div>
+
+    <div class="md:col-span-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <button type="submit" class="btn btn-whatsapp">
+        <WhatsAppIcon />
+        Enviar consulta por WhatsApp
+      </button>
+      <p class="text-xs text-ink-muted">
+        Se abre WhatsApp con el mensaje listo. No guardamos tus datos en este sitio.
+      </p>
+    </div>
+
+    <p
+      id="pif-status"
+      role="status"
+      aria-live="polite"
+      class="md:col-span-2 hidden text-sm font-semibold text-navy-900"
+    >
+    </p>
+  </form>
+</section>
+
+<script>
+  const section = document.getElementById('consultar');
+  const form = document.getElementById('plan-interest-form') as HTMLFormElement | null;
+  const status = document.getElementById('pif-status');
+
+  if (section && form && status) {
+    const companyName = section.dataset.company ?? '';
+    const phone = section.dataset.phone ?? '';
+
+    // El select existe solo en las páginas de compañía; si no está, el plan es
+    // el que quedó fijo en el data-attribute de la página de detalle.
+    const planField = document.getElementById('pif-plan') as HTMLSelectElement | null;
+    const fixedPlan = section.dataset.plan ?? '';
+
+    const messages: Record<string, string> = {
+      'pif-plan': 'Elegí el plan que te interesa.',
+      'pif-name': 'Escribí tu nombre y apellido.',
+      'pif-phone': 'Escribí un teléfono de contacto (al menos 8 dígitos).',
+      'pif-province': 'Elegí tu provincia.',
+      'pif-coverage': 'Elegí el tipo de cobertura.',
+      'pif-consent': 'Necesitamos tu conformidad para poder contactarte.',
+    };
+
+    const showError = (id: string, message: string) => {
+      const field = document.getElementById(id);
+      const slot = form.querySelector<HTMLElement>(`[data-error-for="${id}"]`);
+      field?.setAttribute('aria-invalid', 'true');
+      if (slot) {
+        slot.textContent = message;
+        slot.classList.remove('hidden');
+      }
+    };
+
+    const clearErrors = () => {
+      form.querySelectorAll<HTMLElement>('[data-error-for]').forEach((slot) => {
+        slot.textContent = '';
+        slot.classList.add('hidden');
+      });
+      form
+        .querySelectorAll('[aria-invalid]')
+        .forEach((field) => field.removeAttribute('aria-invalid'));
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearErrors();
+
+      const data = new FormData(form);
+      const planName = planField ? String(data.get('plan') ?? '') : fixedPlan;
+      const name = String(data.get('name') ?? '').trim();
+      const rawPhone = String(data.get('phone') ?? '').trim();
+      const province = String(data.get('province') ?? '');
+      const coverage = String(data.get('coverage') ?? '');
+      const consent = data.get('consent') === 'on';
+
+      // Cuenta solo dígitos: así "11 5555-5555" y "+54 11 5555 5555" pasan igual.
+      const phoneDigits = rawPhone.replace(/\D/g, '');
+
+      const invalid: string[] = [];
+      if (planField && !planName) invalid.push('pif-plan');
+      if (!name) invalid.push('pif-name');
+      if (phoneDigits.length < 8) invalid.push('pif-phone');
+      if (!province) invalid.push('pif-province');
+      if (!coverage) invalid.push('pif-coverage');
+      if (!consent) invalid.push('pif-consent');
+
+      if (invalid.length > 0) {
+        invalid.forEach((id) => showError(id, messages[id]));
+        status.textContent = 'Revisá los campos marcados para poder continuar.';
+        status.classList.remove('hidden');
+        document.getElementById(invalid[0])?.focus();
+        return;
+      }
+
+      // Con el select, el usuario puede declarar que todavía no eligió: en ese
+      // caso el saludo no puede nombrar un plan inexistente.
+      const undecided = planName === 'Todavía no sé cuál';
+      const greeting = undecided
+        ? `¡Hola! Quiero asesoramiento sobre los planes de ${companyName}.`
+        : `¡Hola! Me interesa el ${planName} de ${companyName}.`;
+
+      const message = [
+        greeting,
+        '',
+        `Nombre: ${name}`,
+        `Teléfono: ${rawPhone}`,
+        `Provincia: ${province}`,
+        `Cobertura: ${coverage}`,
+      ].join('\n');
+
+      const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+      const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
+      gtag?.('event', 'generate_lead', {
+        method: 'whatsapp',
+        source: 'plan-interest-form',
+        plan: planName,
+        company: companyName,
+      });
+
+      status.textContent = 'Abriendo WhatsApp con tu consulta…';
+      status.classList.remove('hidden');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+</script>

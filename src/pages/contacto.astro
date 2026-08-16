@@ -1,0 +1,144 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CompanyLogo from '@/components/shared/CompanyLogo.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { contactFor } from '@/lib/contact';
+import { buildWhatsAppLink, companyEnquiryMessage, genericEnquiryMessage } from '@/lib/whatsapp';
+
+const whatsappHref = buildWhatsAppLink(genericEnquiryMessage());
+
+/*
+ * Líneas dedicadas: solo las compañías que declararon contacto propio en su .md.
+ * Las que se atienden con la línea general no entran acá — repetir el mismo
+ * número bajo varios nombres solo confunde. Con ninguna declarada, la sección
+ * entera no se renderiza.
+ */
+const dedicatedLines = (await getCollection('companies'))
+  .filter((company) => company.data.whatsappNumber || company.data.phone)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((company) => ({ company, contact: contactFor(company) }));
+---
+
+<BaseLayout
+  title="Contacto"
+  description={`Escribinos por WhatsApp, llamanos al ${site.phones.sales.label} o mandanos un mail. Asesoramiento sin costo para elegir tu cobertura médica.`}
+>
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-16 md:py-20">
+      <h1 class="max-w-3xl text-4xl md:text-5xl">Hablemos</h1>
+      <p class="prose-measure mt-4 text-lg leading-relaxed text-navy-100/85">
+        La vía más rápida es WhatsApp. Respondemos {site.phones.hours.toLowerCase()}.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-6 md:grid-cols-3">
+      <div class="card flex flex-col p-6">
+        <h2 class="font-display text-lg font-extrabold text-navy-900">WhatsApp</h2>
+        <p class="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
+          Escribinos y te decimos qué plan conviene en tu caso.
+        </p>
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-whatsapp mt-5"
+          data-analytics="whatsapp-contacto"
+        >
+          <WhatsAppIcon />
+          Abrir chat
+        </a>
+      </div>
+
+      <div class="card flex flex-col p-6">
+        <h2 class="font-display text-lg font-extrabold text-navy-900">Teléfono</h2>
+        <p class="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
+          {site.phones.hours}.
+        </p>
+        <a href={site.phones.sales.href} class="btn btn-outline mt-5">
+          {site.phones.sales.label}
+        </a>
+      </div>
+
+      <div class="card flex flex-col p-6">
+        <h2 class="font-display text-lg font-extrabold text-navy-900">Email</h2>
+        <p class="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
+          Para consultas corporativas o documentación.
+          <span class="mt-2 block font-semibold text-ink">{site.email}</span>
+        </p>
+        <a
+          href={`mailto:${site.email}`}
+          class="btn btn-outline mt-5"
+          data-analytics="email-contacto"
+        >
+          Escribir un mail
+        </a>
+      </div>
+    </div>
+
+    {
+      dedicatedLines.length > 0 && (
+        <div class="container-page mt-10">
+          <h2 class="font-display text-xl font-extrabold text-navy-900">
+            Líneas por compañía
+          </h2>
+          <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+            Si ya sabés por qué compañía consultás, escribí directo a su línea y te
+            atiende el equipo que la maneja.
+          </p>
+
+          <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {dedicatedLines.map(({ company, contact }) => (
+              <div class="card flex flex-col p-6">
+                <span
+                  class="mb-4 block h-1 w-12 rounded-full"
+                  style={`background-color: ${company.data.brandColor}`}
+                  aria-hidden="true"
+                />
+                <CompanyLogo company={company} height={34} class="self-start" />
+                <p class="mt-4 flex-1 text-sm leading-relaxed text-ink-muted">
+                  {company.data.summary}
+                </p>
+                <a
+                  href={buildWhatsAppLink(
+                    companyEnquiryMessage(company.data.name),
+                    contact.whatsappNumber,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-whatsapp mt-5"
+                  data-analytics={`whatsapp-contacto-${company.id}`}
+                >
+                  <WhatsAppIcon />
+                  Escribir
+                </a>
+                <a
+                  href={contact.phone.href}
+                  class="mt-3 text-center text-sm font-semibold text-navy-900 underline underline-offset-4"
+                >
+                  {contact.phone.label}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <div class="container-page mt-10">
+      <div class="card p-6 md:p-8">
+        <h2 class="font-display text-xl font-extrabold text-navy-900">
+          Atención a distancia
+        </h2>
+        <p class="prose-measure mt-3 text-sm leading-relaxed text-ink-muted">
+          Trabajamos por teléfono, mail y WhatsApp: no hace falta que vengas a ninguna
+          oficina. Todo el trámite de alta, desde la consulta inicial hasta la
+          documentación, se resuelve a distancia y en cualquier punto del país.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

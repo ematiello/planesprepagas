@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import CompanyBadge from '@/components/shared/CompanyBadge.astro';
+
+/**
+ * Identidad visual de una compañía: su logo oficial si lo tenemos cargado, y si
+ * no el badge de texto.
+ *
+ * El fallback no es defensivo por las dudas: reproducir un logo ajeno requiere
+ * autorización de la marca, así que una compañía nueva se puede cargar y
+ * publicar antes de conseguirla — se ve con badge hasta que el logo llegue.
+ */
+interface Props {
+  company: CollectionEntry<'companies'>;
+  /** Alto de render en px. El ancho lo deduce Astro del aspecto original. */
+  height?: number;
+  /**
+   * true en fondos navy. Los logos suelen traer texto oscuro que desaparece
+   * sobre el fondo oscuro, así que van dentro de un chip claro en vez de
+   * recolorearse — alterar los colores de una marca ajena no es una opción.
+   */
+  onDark?: boolean;
+  /**
+   * true cuando el nombre de la compañía ya está escrito al lado. Evita que el
+   * lector de pantalla lo anuncie dos veces seguidas.
+   */
+  decorative?: boolean;
+  /**
+   * true arriba del pliegue. Diferir la carga de una imagen que ya está en
+   * pantalla retrasa el pintado en vez de acelerarlo, y en las landings pagas
+   * un LCP lento se paga dos veces: en Quality Score y en visitantes que se van.
+   */
+  eager?: boolean;
+  class?: string;
+}
+
+const {
+  company,
+  height = 32,
+  onDark = false,
+  decorative = false,
+  eager = false,
+  class: className = '',
+} = Astro.props;
+
+const { logo, name, brandColor } = company.data;
+---
+
+{
+  logo ? (
+    <span
+      class:list={[
+        'inline-flex items-center',
+        onDark && 'rounded-lg bg-white px-3 py-2',
+        className,
+      ]}
+    >
+      <Image
+        src={logo}
+        alt={decorative ? '' : name}
+        height={height}
+        densities={[1, 2]}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
+        class="w-auto"
+        style={`height: ${height}px`}
+      />
+    </span>
+  ) : (
+    <CompanyBadge name={name} brandColor={brandColor} class={className} />
+  )
+}

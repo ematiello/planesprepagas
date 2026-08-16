@@ -1,0 +1,365 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CompanyLogo from '@/components/shared/CompanyLogo.astro';
+import PlanCard from '@/components/plans/PlanCard.astro';
+import PlanInterestForm from '@/components/plans/PlanInterestForm.astro';
+import UnverifiedDataNotice from '@/components/shared/UnverifiedDataNotice.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { contactFor } from '@/lib/contact';
+import { buildWhatsAppLink, companyEnquiryMessage } from '@/lib/whatsapp';
+
+/**
+ * Una página por compañía representada. Sumar una compañía es agregar un .md en
+ * `src/content/companies/` — esta página, su entrada en la home y su sección en
+ * /planes salen solas.
+ */
+export const getStaticPaths = (async () => {
+  const companies = await getCollection('companies');
+  return companies.map((company) => ({ params: { slug: company.id }, props: { company } }));
+}) satisfies GetStaticPaths;
+
+const { company } = Astro.props;
+
+const plans = (await getCollection('plans', ({ data }) => data.company.id === company.id)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const planNames = plans.map((plan) => plan.data.name);
+const unverifiedCount = plans.filter((plan) => !plan.data.verified).length;
+
+// La línea propia de la compañía si la declaró; si no, la general del sitio.
+const contact = contactFor(company);
+const whatsappHref = buildWhatsAppLink(
+  companyEnquiryMessage(company.data.name),
+  contact.whatsappNumber,
+);
+
+const { Content } = await render(company);
+
+// provider = la compañía que presta el servicio; seller = nosotros, que lo
+// comercializamos. Es la misma distinción que hace el footer.
+const itemListSchema = {
+  '@type': 'ItemList',
+  name: `Planes de ${company.data.name}`,
+  itemListElement: plans.map((plan, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    item: {
+      '@type': 'Service',
+      name: `${plan.data.name} — ${company.data.name}`,
+      serviceType: 'Cobertura médica prepaga',
+      description: plan.data.seoDescription,
+      url: new URL(`/planes/${plan.id}`, Astro.site).href,
+      provider: {
+        '@type': 'Organization',
+        name: company.data.name,
+        url: company.data.website,
+      },
+      seller: {
+        '@type': 'Organization',
+        '@id': `${Astro.site}#organization`,
+        name: site.name,
+      },
+      areaServed: { '@type': 'Country', name: 'Argentina' },
+    },
+  })),
+};
+
+// Migas de pan declaradas: es lo que hace que Google muestre la ruta
+// "Inicio › Planes › Avalian" en el resultado en vez de la URL cruda.
+const breadcrumbSchema = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', Astro.site).href },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Planes',
+      item: new URL('/planes', Astro.site).href,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: company.data.name,
+      item: new URL(`/companias/${company.id}`, Astro.site).href,
+    },
+  ],
+};
+
+const companyFaq = company.data.faq ?? [];
+
+/*
+ * Varios tipos en un solo bloque JSON-LD. El FAQPage solo se emite si la
+ * compañía cargó preguntas propias: publicarlo vacío, o repitiendo las de
+ * /preguntas-frecuentes, es peor que no publicarlo.
+ */
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    itemListSchema,
+    breadcrumbSchema,
+    ...(companyFaq.length > 0
+      ? [
+          {
+            '@type': 'FAQPage',
+            mainEntity: companyFaq.map((item) => ({
+              '@type': 'Question',
+              name: item.question,
+              acceptedAnswer: { '@type': 'Answer', text: item.answer },
+            })),
+          },
+        ]
+      : []),
+  ],
+};
+---
+
+<BaseLayout
+  title={`Planes de ${company.data.name}`}
+  description={`Compará los planes de ${company.data.name} en un solo lugar: qué cubre cada uno, a quién apunta y en qué se diferencian. Asesoramiento sin costo por WhatsApp.`}
+  schema={schema}
+>
+  <nav aria-label="Migas de pan" class="border-b border-hairline bg-surface">
+    <ol class="container-page flex flex-wrap gap-2 py-3 text-xs text-ink-muted">
+      <li><a href="/" class="hover:text-navy-900">Inicio</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href="/planes" class="hover:text-navy-900">Planes</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="font-semibold text-ink">{company.data.name}</li>
+    </ol>
+  </nav>
+
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-14 md:py-20">
+      <CompanyLogo company={company} height={44} onDark decorative eager />
+      <h1 class="mt-5 max-w-3xl text-4xl md:text-5xl">
+        Planes de {company.data.name}
+      </h1>
+      <p class="mt-3 font-display text-xl font-bold text-amber-brand">
+        {company.data.summary}
+      </p>
+      <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
+        {`${company.data.name} tiene ${plans.length} ${plans.length === 1 ? 'plan vigente' : 'planes vigentes'}`},
+        y la diferencia entre ellos no es "más caro o más barato": cambia el alcance de la
+        cartilla, el esquema de copagos y los beneficios que vas a usar seguido. Acá están
+        todos, uno al lado del otro.
+      </p>
+      <p class="mt-6 text-sm text-navy-100/70">
+        Planes provistos por <strong class="font-semibold text-white">{company.data.name}</strong>.
+        Gestionamos el alta y te acompañamos en el trámite, sin costo para vos.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center gap-3">
+        <a href="#consultar" class="btn btn-primary">Consultar un plan</a>
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-analytics={`whatsapp-companias-${company.id}`}
+          class="btn btn-whatsapp"
+        >
+          <WhatsAppIcon />
+          Escribinos por WhatsApp
+        </a>
+        {/* La línea de atención de esta compañía, visible junto al CTA. */}
+        <a
+          href={contact.phone.href}
+          class="text-sm font-semibold text-navy-100 underline underline-offset-4 transition hover:text-white"
+        >
+          {contact.phone.label}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      {unverifiedCount > 0 && <UnverifiedDataNotice count={unverifiedCount} companyName={company.data.name} />}
+
+      <h2 class="mt-8 font-display text-2xl font-extrabold text-navy-900">
+        {plans.length === 1
+          ? `El plan de ${company.data.name}`
+          : `Los ${plans.length} planes de ${company.data.name}`}
+      </h2>
+      <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+        Entrá a cada uno para ver el detalle completo, o mirá la comparación de abajo si
+        querés ubicar rápido cuál te corresponde.
+      </p>
+
+      <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {plans.map((plan) => <PlanCard plan={plan} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-hairline bg-surface py-16 md:py-20">
+    <div class="container-page">
+      <h2 class="font-display text-2xl font-extrabold text-navy-900">
+        En qué se diferencian
+      </h2>
+      <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+        Misma compañía y misma red de base; lo que cambia es a quién apunta cada plan y
+        qué suma por encima de la cobertura esencial.
+      </p>
+
+      {/* La tabla scrollea dentro de su caja: en mobile el ancho no rompe la página. */}
+      <div class="mt-8 -mx-5 overflow-x-auto px-5">
+        <table class="w-full min-w-[46rem] border-collapse text-left text-sm">
+          <caption class="sr-only">
+            Comparación de los planes de {company.data.name}
+          </caption>
+          <thead>
+            <tr class="border-b-2 border-navy-900">
+              <th scope="col" class="w-40 py-3 pr-4 font-display text-xs font-bold uppercase tracking-wider text-ink-muted">
+                Plan
+              </th>
+              <th scope="col" class="py-3 pr-4 font-display text-xs font-bold uppercase tracking-wider text-ink-muted">
+                Ideal para
+              </th>
+              <th scope="col" class="py-3 font-display text-xs font-bold uppercase tracking-wider text-ink-muted">
+                Qué incluye
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              plans.map((plan) => (
+                <tr class="border-b border-hairline align-top">
+                  <th scope="row" class="py-5 pr-4 font-normal">
+                    <a
+                      href={`/planes/${plan.id}`}
+                      class="font-display text-base font-extrabold text-navy-900 underline decoration-amber-brand decoration-2 underline-offset-4"
+                    >
+                      {plan.data.name}
+                    </a>
+                    <span class="mt-1 block text-xs leading-relaxed text-ink-muted">
+                      {plan.data.tagline}
+                    </span>
+                  </th>
+                  <td class="py-5 pr-4 text-ink">{plan.data.audience}</td>
+                  <td class="py-5">
+                    <ul class="flex flex-col gap-1.5">
+                      {plan.data.benefits.map((benefit) => (
+                        <li class="flex items-start gap-2 leading-relaxed text-ink">
+                          <svg
+                            class="mt-1 h-4 w-4 shrink-0 text-amber-brand-dark"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 011.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-start">
+      <div>
+        <h2 class="font-display text-2xl font-extrabold text-navy-900">
+          Sobre {company.data.name}
+        </h2>
+        {/* El cuerpo del .md de la compañía: la descripción vive con el contenido. */}
+        <div class="prose-measure mt-4 text-sm leading-relaxed text-ink-muted">
+          <Content />
+        </div>
+        <p class="prose-measure mt-4 text-sm leading-relaxed text-ink-muted">
+          Conocemos sus planes en detalle y te decimos con franqueza cuál te sirve y cuál
+          no.{' '}
+          <a
+            href={company.data.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-navy-900 underline underline-offset-4"
+          >
+            Sitio oficial de {company.data.name}
+          </a>.
+        </p>
+
+        <p class="prose-measure mt-8 text-xs leading-relaxed text-ink-muted">
+          {company.data.name} y su denominación pertenecen a su titular y se citan con
+          fines identificatorios. El plan es provisto por la compañía y el contrato se
+          firma con ella; las condiciones, carencias y valores definitivos son los de ese
+          contrato.
+        </p>
+      </div>
+
+      <PlanInterestForm
+        companyName={company.data.name}
+        planOptions={planNames}
+        whatsappNumber={contact.whatsappNumber}
+      />
+    </div>
+  </section>
+
+  {
+    companyFaq.length > 0 && (
+      <section class="border-t border-hairline bg-canvas py-14 md:py-20">
+        <div class="container-page">
+          <h2 class="font-display text-2xl font-extrabold text-navy-900">
+            Preguntas sobre {company.data.name}
+          </h2>
+          <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+            Las dudas propias de esta compañía. Para cómo trabajamos, el alta y los
+            pagos, mirá las{' '}
+            <a
+              href="/preguntas-frecuentes"
+              class="font-semibold text-navy-900 underline underline-offset-4"
+            >
+              preguntas frecuentes del sitio
+            </a>
+            .
+          </p>
+
+          <div class="mt-8 flex max-w-3xl flex-col divide-y divide-hairline border-y border-hairline">
+            {companyFaq.map((item) => (
+              <details class="group py-4">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-base font-bold text-navy-900">
+                  {item.question}
+                  <span
+                    class="shrink-0 text-amber-brand-dark transition group-open:rotate-45"
+                    aria-hidden="true"
+                  >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9 4h2v12H9z" />
+                      <path d="M4 9h12v2H4z" />
+                    </svg>
+                  </span>
+                </summary>
+                <p class="prose-measure mt-3 text-sm leading-relaxed text-ink-muted">
+                  {item.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="border-t border-hairline bg-surface py-12">
+    <div class="container-page flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <p class="prose-measure text-sm leading-relaxed text-ink-muted">
+        ¿Seguís sin definir cuál te conviene? Contanos tu caso y te decimos cuál encaja,
+        sin costo.
+      </p>
+      <a href="#consultar" class="btn btn-primary shrink-0">Consultar un plan</a>
+    </div>
+  </section>
+</BaseLayout>

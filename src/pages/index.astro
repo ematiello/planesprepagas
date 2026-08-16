@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CompanyLogo from '@/components/shared/CompanyLogo.astro';
+import PlanCard from '@/components/plans/PlanCard.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { buildWhatsAppLink, genericEnquiryMessage } from '@/lib/whatsapp';
+
+/*
+ * La home no nombra ninguna compañía en el código: se arma desde la colección.
+ * Sumar una compañía la hace aparecer acá sin tocar esta página.
+ */
+const companies = (await getCollection('companies')).sort((a, b) => a.data.order - b.data.order);
+const allPlans = await getCollection('plans');
+
+const companyCards = companies
+  .map((company) => ({
+    company,
+    plans: allPlans
+      .filter((plan) => plan.data.company.id === company.id)
+      .sort((a, b) => a.data.order - b.data.order),
+  }))
+  .filter((entry) => entry.plans.length > 0);
+
+// Destacados si hay marcados; si no, los primeros del catálogo. Con una sola
+// compañía esto es todo su catálogo, y con varias evita una grilla interminable.
+const featured = allPlans.filter((plan) => plan.data.featured);
+const showcase = (featured.length > 0 ? featured : allPlans)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 6);
+
+const whatsappHref = buildWhatsAppLink(genericEnquiryMessage());
+
+/*
+ * La numeración es real acá: son tres pasos en secuencia, y el orden importa
+ * (no se puede gestionar el alta antes de definir el plan). No es decoración.
+ */
+const steps = [
+  {
+    title: 'Nos contás tu situación',
+    body: 'Dónde vivís, si viajás, qué prestadores usás hoy, si sumás grupo familiar y qué presupuesto manejás.',
+  },
+  {
+    title: 'Te decimos cuál te conviene',
+    body: 'Cambian la cartilla, los copagos y los beneficios. Te explicamos en criollo qué plan encaja con tu caso y por qué.',
+  },
+  {
+    title: 'Gestionamos el alta',
+    body: 'Cuando definís, preparamos la documentación y seguimos el trámite hasta que la cobertura esté activa.',
+  },
+];
+
+const differentiators = [
+  {
+    title: 'Conocemos los planes en detalle',
+    body: 'Carencias, copagos y letra chica de cada plan: los manejamos de antemano, no los averiguamos sobre la marcha mientras te atendemos.',
+  },
+  {
+    title: 'El asesoramiento no te cuesta nada',
+    body: 'No cobramos honorarios ni recargamos la cuota: contratar con nosotros sale lo mismo que ir directo a la compañía.',
+  },
+  {
+    title: 'Te acompañamos después de la firma',
+    body: 'El vínculo no termina con el alta: si necesitás cambiar de plan o resolver un trámite, seguís teniendo con quién hablar.',
+  },
+];
+---
+
+{/* Título corto a propósito: el tagline completo pasa los ~60 caracteres que muestra Google. */}
+<BaseLayout
+  title={`${site.name} — Asesores en medicina prepaga`}
+  description={site.description}
+  isHome={true}
+>
+  <section class="relative overflow-hidden bg-navy-900 text-white">
+    {/* Trama geométrica sutil en vez de una foto de stock de familia sonriendo. */}
+    <div
+      class="pointer-events-none absolute inset-0 opacity-[0.07]"
+      style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 28px 28px;"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-page relative py-20 md:py-28">
+      <p class="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-brand">
+        Asesores en medicina prepaga
+      </p>
+      <h1 class="mt-4 max-w-4xl text-4xl leading-[1.1] md:text-6xl">
+        Elegí tu cobertura médica sin vueltas
+      </h1>
+      <p class="prose-measure mt-6 text-lg leading-relaxed text-navy-100/85">
+        Te explicamos qué cubre cada plan, cuál se adapta a tu situación y gestionamos el
+        alta de punta a punta. Sin costo y sin vueltas.
+      </p>
+
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a href="/planes" class="btn btn-primary">Ver los planes</a>
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-whatsapp"
+          data-analytics="whatsapp-hero"
+        >
+          <WhatsAppIcon />
+          Consultar por WhatsApp
+        </a>
+      </div>
+
+      {/* Las compañías representadas: es lo primero que el visitante quiere confirmar. */}
+      <div class="mt-12">
+        <p class="font-display text-xs font-bold uppercase tracking-[0.18em] text-navy-100/60">
+          Compañías que representamos
+        </p>
+        <ul class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-4 text-sm text-navy-100/70">
+          {
+            companyCards.map(({ company, plans }) => (
+              <li>
+                <a
+                  href={`/companias/${company.id}`}
+                  class="flex items-center gap-3 transition hover:opacity-80"
+                >
+                  <CompanyLogo company={company} height={30} onDark decorative />
+                  <span class="sr-only">{company.data.name}</span>
+                  {/* Un solo literal: el espacio entre dos expresiones adyacentes se pierde. */}
+                  <span>{`${plans.length} ${plans.length === 1 ? 'plan' : 'planes'}`}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      <h2 class="text-3xl md:text-4xl">Por qué conviene consultarnos</h2>
+      <div class="mt-10 grid gap-6 md:grid-cols-3">
+        {
+          differentiators.map((item) => (
+            <div class="card p-6">
+              <h3 class="font-display text-lg font-extrabold text-navy-900">
+                {item.title}
+              </h3>
+              <p class="mt-3 text-sm leading-relaxed text-ink-muted">{item.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-hairline bg-surface py-16 md:py-20">
+    <div class="container-page">
+      <h2 class="text-3xl md:text-4xl">Cómo es el proceso</h2>
+      <ol class="mt-10 grid gap-8 md:grid-cols-3">
+        {
+          steps.map((step, index) => (
+            <li class="flex flex-col gap-3">
+              <span
+                class="grid h-11 w-11 place-items-center rounded-full bg-navy-900 font-display text-base font-extrabold text-amber-brand"
+                aria-hidden="true"
+              >
+                {index + 1}
+              </span>
+              <h3 class="font-display text-lg font-extrabold text-navy-900">
+                {step.title}
+              </h3>
+              <p class="text-sm leading-relaxed text-ink-muted">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      <h2 class="text-3xl md:text-4xl">Con quién trabajamos</h2>
+      <p class="prose-measure mt-3 text-base leading-relaxed text-ink-muted">
+        Representamos a las compañías que listamos acá y comercializamos sus planes. La
+        cobertura la presta cada compañía; el contrato lo firmás con ella.
+      </p>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {
+          companyCards.map(({ company, plans }) => (
+            <article class="card flex flex-col p-6">
+              <span
+                class="mb-5 block h-1 w-12 rounded-full"
+                style={`background-color: ${company.data.brandColor}`}
+                aria-hidden="true"
+              />
+              <CompanyLogo company={company} height={40} class="self-start" />
+              <p class="mt-5 flex-1 text-sm leading-relaxed text-ink-muted">
+                {company.data.summary}
+              </p>
+              <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                {`${plans.length} ${plans.length === 1 ? 'plan disponible' : 'planes disponibles'}`}
+              </p>
+              <a href={`/companias/${company.id}`} class="btn btn-outline mt-5 w-full">
+                Ver sus planes
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-hairline bg-surface py-16 md:py-20">
+    <div class="container-page">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <h2 class="text-3xl md:text-4xl">Los planes</h2>
+        <a href="/planes" class="text-sm font-semibold text-navy-900 underline underline-offset-4">
+          Ver la comparación completa
+        </a>
+      </div>
+
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {showcase.map((plan) => <PlanCard plan={plan} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-navy-900 py-16 text-white md:py-20">
+    <div class="container-page flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h2 class="text-3xl">¿Arrancamos?</h2>
+        <p class="prose-measure mt-3 leading-relaxed text-navy-100/85">
+          Contanos qué necesitás y te decimos qué plan te conviene. Respondemos
+          {' '}{site.phones.hours.toLowerCase()}.
+        </p>
+      </div>
+      <a
+        href={whatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-whatsapp shrink-0"
+        data-analytics="whatsapp-home-cta"
+      >
+        <WhatsAppIcon />
+        Escribinos por WhatsApp
+      </a>
+    </div>
+  </section>
+</BaseLayout>

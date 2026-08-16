@@ -1,0 +1,124 @@
+---
+import '@/styles/global.css';
+import { site } from '@/config/site';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import WhatsAppFloatingButton from '@/components/layout/WhatsAppFloatingButton.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD extra de la página (Product, FAQPage, etc.). */
+  schema?: Record<string, unknown>;
+  /** true en la home: evita repetir el nombre de la marca dos veces en el título. */
+  isHome?: boolean;
+}
+
+const { title, description, schema, isHome = false } = Astro.props;
+
+const pageTitle = isHome ? title : `${title} | ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${Astro.site}#organization`,
+  name: site.name,
+  legalName: site.legalName,
+  description: site.description,
+  url: Astro.site?.href,
+  telephone: site.phones.sales.label,
+  email: site.email,
+  // Sin `address`: no hay atención presencial, así que no declaramos domicilio.
+  // `areaServed` cubre el dato geográfico que los buscadores sí necesitan.
+  areaServed: { '@type': 'Country', name: site.areaServed },
+  sameAs: Object.values(site.social),
+};
+---
+
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(organizationSchema)}
+    />
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+
+    {
+      site.analyticsId && (
+        <>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${site.analyticsId}`}
+          />
+          <script is:inline define:vars={{ analyticsId: site.analyticsId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', analyticsId);
+          </script>
+        </>
+      )
+    }
+  </head>
+
+  <body class="flex min-h-screen flex-col">
+    <a
+      href="#contenido"
+      class="sr-only rounded-lg focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-navy-900 focus:px-4 focus:py-2 focus:text-white"
+    >
+      Saltar al contenido
+    </a>
+
+    <Header />
+
+    <main id="contenido" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+    <WhatsAppFloatingButton />
+
+    <script>
+      // Registra los contactos salientes como conversión, si GA4 está configurado.
+      // El prefijo del data-analytics ("whatsapp-hero", "email-footer") define el
+      // canal, así que sumar uno nuevo no requiere tocar este script.
+      document
+        .querySelectorAll('[data-analytics^="whatsapp"], [data-analytics^="email"]')
+        .forEach((link) => {
+          link.addEventListener('click', () => {
+            const source = link.getAttribute('data-analytics') ?? '';
+            const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
+            gtag?.('event', 'generate_lead', {
+              method: source.split('-')[0],
+              source,
+            });
+          });
+        });
+    </script>
+  </body>
+</html>

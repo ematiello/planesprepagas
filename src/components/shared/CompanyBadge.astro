@@ -1,0 +1,28 @@
+---
+/**
+ * Chip que identifica de qué compañía es un plan.
+ *
+ * Usa el color de marca de la compañía SOLO como punto de color (borde y punto),
+ * nunca como fondo pleno: el texto queda sobre el fondo neutro de la tarjeta,
+ * así el contraste no depende del hex que cargue cada compañía.
+ *
+ * Es texto, no logo: reproducir logos ajenos requiere permiso de cada marca.
+ */
+interface Props {
+  name: string;
+  brandColor: string;
+  class?: string;
+}
+const { name, brandColor, class: className = '' } = Astro.props;
+---
+
+<span
+  class={`inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-semibold tracking-wide text-ink ${className}`}
+  style={`border-color: ${brandColor}`}
+>
+  <span
+    class="h-2 w-2 shrink-0 rounded-full"
+    style={`background-color: ${brandColor}`}
+    aria-hidden="true"></span>
+  {name}
+</span>

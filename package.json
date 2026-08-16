@@ -1,0 +1,22 @@
+{
+  "name": "sitio-broker-salud",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "dev:movil": "astro dev --host",
+    "preview:movil": "astro preview --host"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "@fontsource-variable/manrope": "^5.2.5",
+    "@fontsource/public-sans": "^5.2.5",
+    "@tailwindcss/vite": "^4.1.14",
+    "astro": "^5.14.1",
+    "tailwindcss": "^4.1.14"
+  }
+}

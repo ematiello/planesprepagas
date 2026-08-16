@@ -1,0 +1,185 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CompanyLogo from '@/components/shared/CompanyLogo.astro';
+import PlanCard from '@/components/plans/PlanCard.astro';
+import UnverifiedDataNotice from '@/components/shared/UnverifiedDataNotice.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { contactFor } from '@/lib/contact';
+import { buildWhatsAppLink, companyEnquiryMessage, genericEnquiryMessage } from '@/lib/whatsapp';
+
+/**
+ * Listado general: todos los planes que comercializamos, agrupados por compañía.
+ * No nombra ninguna compañía en el código — se arma desde las colecciones, así
+ * que sumar una es agregar su .md y los planes que la referencian.
+ */
+const companies = (await getCollection('companies')).sort((a, b) => a.data.order - b.data.order);
+const allPlans = await getCollection('plans');
+
+const groups = companies
+  .map((company) => ({
+    company,
+    contact: contactFor(company),
+    plans: allPlans
+      .filter((plan) => plan.data.company.id === company.id)
+      .sort((a, b) => a.data.order - b.data.order),
+  }))
+  // Una compañía cargada pero todavía sin planes no debe renderizar una sección vacía.
+  .filter((group) => group.plans.length > 0);
+
+const unverifiedCount = allPlans.filter((plan) => !plan.data.verified).length;
+const whatsappHref = buildWhatsAppLink(genericEnquiryMessage());
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Planes de medicina prepaga',
+  itemListElement: groups.flatMap((group) =>
+    group.plans.map((plan) => ({
+      '@type': 'ListItem',
+      item: {
+        '@type': 'Service',
+        name: `${plan.data.name} — ${group.company.data.name}`,
+        serviceType: 'Cobertura médica prepaga',
+        description: plan.data.seoDescription,
+        url: new URL(`/planes/${plan.id}`, Astro.site).href,
+        provider: {
+          '@type': 'Organization',
+          name: group.company.data.name,
+          url: group.company.data.website,
+        },
+        seller: {
+          '@type': 'Organization',
+          '@id': `${Astro.site}#organization`,
+          name: site.name,
+        },
+        areaServed: { '@type': 'Country', name: 'Argentina' },
+      },
+    })),
+  ),
+};
+---
+
+<BaseLayout
+  title="Planes de medicina prepaga"
+  description="Todos los planes que comercializamos, agrupados por compañía: qué cubre cada uno, a quién apunta y en qué se diferencian. Asesoramiento sin costo por WhatsApp."
+  schema={schema}
+>
+  <nav aria-label="Migas de pan" class="border-b border-hairline bg-surface">
+    <ol class="container-page flex flex-wrap gap-2 py-3 text-xs text-ink-muted">
+      <li><a href="/" class="hover:text-navy-900">Inicio</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="font-semibold text-ink">Planes</li>
+    </ol>
+  </nav>
+
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-14 md:py-20">
+      <p class="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-brand">
+        Planes
+      </p>
+      <h1 class="mt-4 max-w-3xl text-4xl md:text-5xl">
+        Todos los planes, explicados sin vueltas
+      </h1>
+      <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
+        La diferencia entre un plan y otro no es "más caro o más barato": cambia el
+        alcance de la cartilla, el esquema de copagos y los beneficios que vas a usar
+        seguido. Acá están todos, uno al lado del otro, con lo que cubre cada uno.
+      </p>
+
+      {/* Índice de compañías: con varias cargadas, evita scrollear para ubicar la buscada. */}
+      {
+        groups.length > 1 && (
+          <ul class="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            {groups.map((group) => (
+              <li>
+                <a
+                  href={`#${group.company.id}`}
+                  class="font-display font-bold text-white underline-offset-4 hover:underline"
+                >
+                  {group.company.data.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-whatsapp"
+          data-analytics="whatsapp-planes-hero"
+        >
+          <WhatsAppIcon />
+          Consultar por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      {unverifiedCount > 0 && <UnverifiedDataNotice count={unverifiedCount} />}
+
+      <div class="mt-10 flex flex-col gap-16">
+        {
+          groups.map((group) => (
+            <div id={group.company.id} class="scroll-mt-28">
+              <div class="flex flex-wrap items-end justify-between gap-4 border-b border-hairline pb-5">
+                <div>
+                  <CompanyLogo company={group.company} height={38} decorative />
+                  <h2 class="mt-4 font-display text-2xl font-extrabold text-navy-900">
+                    Planes de {group.company.data.name}
+                  </h2>
+                  <p class="prose-measure mt-2 text-sm leading-relaxed text-ink-muted">
+                    {group.company.data.summary}
+                  </p>
+                </div>
+
+                {/* Cada compañía se consulta por su propia línea. */}
+                <div class="flex flex-wrap items-center gap-3">
+                  <a href={`/companias/${group.company.id}`} class="btn btn-outline">
+                    Ver {group.company.data.name}
+                  </a>
+                  <a
+                    href={buildWhatsAppLink(
+                      companyEnquiryMessage(group.company.data.name),
+                      group.contact.whatsappNumber,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-whatsapp"
+                    data-analytics={`whatsapp-planes-${group.company.id}`}
+                  >
+                    <WhatsAppIcon />
+                    Consultar
+                  </a>
+                </div>
+              </div>
+
+              <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {group.plans.map((plan) => (
+                  <PlanCard plan={plan} />
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-hairline bg-surface py-12">
+    <div class="container-page flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <p class="prose-measure text-sm leading-relaxed text-ink-muted">
+        ¿No sabés cuál te conviene? Contanos tu situación y te decimos qué plan encaja,
+        sin costo.
+      </p>
+      <a href="/contacto" class="btn btn-primary shrink-0">Hablar con un asesor</a>
+    </div>
+  </section>
+</BaseLayout>

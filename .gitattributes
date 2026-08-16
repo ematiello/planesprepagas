@@ -1,0 +1,18 @@
+# Normaliza los finales de línea a LF en el repositorio.
+#
+# Sin esto, editar en Windows guarda CRLF y el próximo commit desde otra máquina
+# —o desde el runner Linux del deploy— marca como modificado un archivo que
+# nadie tocó. El checkout local sigue usando el final de línea nativo.
+* text=auto eol=lf
+
+# Binarios: que Git no intente normalizarlos ni mostrar diffs de texto.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# El lockfile es generado: colapsarlo en las revisiones de PR.
+package-lock.json linguist-generated=true

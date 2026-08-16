@@ -1,0 +1,96 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
+import { site } from '@/config/site';
+import { buildWhatsAppLink } from '@/lib/whatsapp';
+
+const whatsappHref = buildWhatsAppLink(
+  '¡Hola! Quiero consultar por planes de salud corporativos para mi empresa.',
+);
+
+const benefits = [
+  {
+    title: 'Condiciones por volumen',
+    body: 'A partir de cierta cantidad de empleados las compañías manejan valores y coberturas distintos a los del plan individual.',
+  },
+  {
+    title: 'Un solo interlocutor',
+    body: 'Altas, bajas y modificaciones de la nómina las gestionamos nosotros, sin que RR.HH. tenga que hablar con la compañía.',
+  },
+  {
+    title: 'Propuesta documentada',
+    body: 'Armamos el cuadro con las alternativas que aplican a tu nómina, para que la decisión quede por escrito.',
+  },
+  {
+    title: 'Acompañamiento a los empleados',
+    body: 'Resolvemos las consultas del personal para que el área de RR.HH. no quede como mesa de ayuda de la prepaga.',
+  },
+];
+---
+
+<BaseLayout
+  title="Planes de salud para empresas"
+  description="Coberturas médicas corporativas: armamos la propuesta, gestionamos altas y bajas de nómina y atendemos las consultas del personal."
+>
+  <section class="bg-navy-900 text-white">
+    <div class="container-page py-16 md:py-24">
+      <p class="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-brand">
+        Empresas
+      </p>
+      <h1 class="mt-3 max-w-3xl text-4xl md:text-5xl">
+        Cobertura médica para tu equipo, sin que RR.HH. quede en el medio
+      </h1>
+      <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
+        Armamos y administramos el plan de salud corporativo: definimos la cobertura,
+        negociamos condiciones con la compañía y nos ocupamos de la operación del día a
+        día.
+      </p>
+      <a
+        href={whatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-whatsapp mt-8"
+        data-analytics="whatsapp-empresas"
+      >
+        <WhatsAppIcon />
+        Pedir una propuesta
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-page">
+      <h2 class="text-3xl md:text-4xl">Qué incluye el servicio corporativo</h2>
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        {
+          benefits.map((benefit) => (
+            <div class="card p-6">
+              <h3 class="font-display text-lg font-extrabold text-navy-900">
+                {benefit.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-muted">{benefit.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-hairline bg-surface py-14">
+    <div class="container-page">
+      <h2 class="text-2xl">Para pedir una propuesta necesitamos</h2>
+      <ul class="prose-measure mt-5 flex flex-col gap-2.5 text-sm leading-relaxed text-ink-muted">
+        <li>· Cantidad de empleados a cubrir y si se incluyen grupos familiares.</li>
+        <li>· Distribución por edades, aunque sea aproximada.</li>
+        <li>· Provincias donde trabaja el personal.</li>
+        <li>· Si hoy tienen una cobertura contratada y con qué compañía.</li>
+      </ul>
+      <p class="prose-measure mt-5 text-sm leading-relaxed text-ink-muted">
+        Con esos datos volvemos con una propuesta. Escribinos por WhatsApp o al{' '}
+        <a href={`mailto:${site.email}`} class="font-semibold text-navy-900 underline underline-offset-4">
+          {site.email}
+        </a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
