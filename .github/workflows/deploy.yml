@@ -25,11 +25,12 @@ jobs:
         run: npm run build --prefix sitio-broker-salud
 
       - name: Deploy to Hostinger via SFTP
-        uses: pressworks/github-action-ftp-deployment@master
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
-          host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          server: ${{ secrets.SFTP_HOST }}
           port: ${{ secrets.SFTP_PORT }}
-          local-dir: ./sitio-broker-salud/dist/
-          remote-dir: ./public_html/sitio-broker-salud/dist/
+          password: ${{ secrets.SFTP_PASSWORD }}
+          local_path: './sitio-broker-salud/dist/*'
+          remote_path: './public_html/'
+          sftp_only: true
