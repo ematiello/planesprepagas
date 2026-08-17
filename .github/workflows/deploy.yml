@@ -19,10 +19,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install --prefix sitio-broker-salud
+        run: npm install
 
       - name: Build site
-        run: npm run build --prefix sitio-broker-salud
+        run: npm run build
 
       - name: Deploy to Hostinger via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
@@ -31,6 +31,6 @@ jobs:
           server: ${{ secrets.SFTP_HOST }}
           port: ${{ secrets.SFTP_PORT }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './sitio-broker-salud/dist/*'
+          local_path: './dist/*'
           remote_path: '/home/u427298056/domains/planesprepagas.com.ar/public_html/'
           sftp_only: true
