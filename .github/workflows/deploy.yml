@@ -13,10 +13,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Node 22: @tailwindcss/oxide exige >= 20 y astro >= 22. Con Node 18 el
+      # paso de build falla y el deploy queda saltado, que es lo que venia
+      # pasando en silencio desde que entro Tailwind v4.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
