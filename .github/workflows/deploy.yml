@@ -1,55 +1,17 @@
-name: Deploy to Hostinger
+name: Build & Validate
 
 on:
   push:
     branches:
       - main
-  # Permite lanzarlo a mano desde la pestaña Actions, para probar el deploy sin
-  # tener que inventar un commit.
-  workflow_dispatch:
-
-# Datos de conexion que NO son secretos: el usuario ya aparece en remote_path y
-# la IP del servidor esta publicada en el registro DNS `ftp` del dominio. Se
-# dejan como valores por defecto para que la puesta en marcha necesite cargar un
-# unico secret (SFTP_PASSWORD). Cualquiera de los tres se puede sobrescribir
-# creando el secret correspondiente, por ejemplo si Hostinger migra la cuenta de
-# servidor.
-env:
-  SFTP_USER: ${{ secrets.SFTP_USER || 'u427298056' }}
-  SFTP_HOST: ${{ secrets.SFTP_HOST || '147.93.39.140' }}
-  # 65002 es el puerto SSH/SFTP del hosting compartido de Hostinger. El 22 esta
-  # cerrado, asi que el default de la accion nunca habria funcionado.
-  SFTP_PORT: ${{ secrets.SFTP_PORT || '65002' }}
-  REMOTE_PATH: '/home/u427298056/domains/planesprepagas.com.ar/public_html/'
-  SITE_URL: 'https://www.planesprepagas.com.ar'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      # Falla temprano y con un mensaje legible si falta la contrasena. Sin esta
-      # guarda, la accion recibe strings vacios y muere con "Bad port \"-o\"",
-      # que no dice absolutamente nada sobre la causa real. Fue exactamente lo
-      # que paso en las 10 primeras ejecuciones del workflow.
-      - name: Verificar credenciales
-        env:
-          # Via env y no interpolado en el script: evita que un caracter raro en
-          # la contrasena rompa el shell o se cuele como comando.
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
-        run: |
-          if [ -z "$SFTP_PASSWORD" ]; then
-            echo "::error::Falta el secret SFTP_PASSWORD. Cargarlo en Settings > Secrets and variables > Actions con la contrasena SSH de la cuenta de Hostinger (hPanel > Avanzado > Acceso SSH)."
-            exit 1
-          fi
-          echo "Credenciales presentes. Destino: $SFTP_USER@$SFTP_HOST:$SFTP_PORT"
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Node 22: @tailwindcss/oxide exige >= 20 y astro pide
-      # 18.20.8 || ^20.3.0 || >=22.0.0. Con Node 18 el build falla y los pasos
-      # de deploy quedan saltados.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -62,62 +24,15 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Deploy to Hostinger via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
-        with:
-          username: ${{ env.SFTP_USER }}
-          server: ${{ env.SFTP_HOST }}
-          port: ${{ env.SFTP_PORT }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './dist/*'
-          remote_path: ${{ env.REMOTE_PATH }}
-          sftp_only: true
-
-      # El paso de arriba sube `./dist/*` con `put -r` de sftp, y ese glob NO
-      # incluye archivos ocultos: sin este segundo paso el .htaccess nunca llega
-      # al servidor y el sitio responde 200 en www y sin www a la vez.
-      - name: Deploy .htaccess (el glob de arriba omite los ocultos)
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
-        with:
-          username: ${{ env.SFTP_USER }}
-          server: ${{ env.SFTP_HOST }}
-          port: ${{ env.SFTP_PORT }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './dist/.htaccess'
-          remote_path: ${{ env.REMOTE_PATH }}
-          sftp_only: true
-
-      # Comprueba contra el sitio real que lo subido efectivamente se sirve. El
-      # HTML no lo cachea la CDN de Hostinger (responde x-hcdn-cache-status:
-      # DYNAMIC), asi que la lectura es del origen y no de una copia vieja.
-      - name: Verificar el sitio publicado
+      - name: Verify build output
         run: |
-          gtm_id=$(grep -oE "GTM-[A-Z0-9]+" src/config/site.ts | head -1)
-          echo "Contenedor esperado: $gtm_id"
-
-          for i in $(seq 1 10); do
-            body=$(curl -fsS --max-time 20 "$SITE_URL/" || true)
-            if printf '%s' "$body" | grep -q "$gtm_id"; then
-              echo "OK: la home ya sirve $gtm_id"
-              ok=1
-              break
-            fi
-            echo "Intento $i: todavia no se refleja, reintento en 10s"
-            sleep 10
-          done
-
-          if [ "${ok:-0}" != "1" ]; then
-            echo "::error::El deploy termino sin error pero la home no sirve $gtm_id. Revisar que remote_path apunte al document root correcto."
+          if [ ! -d "dist" ]; then
+            echo "::error::Build fallido: no se genero dist/"
             exit 1
           fi
-
-          # El .htaccess es el unico archivo que necesita su propio paso, asi que
-          # se verifica aparte: si falta, sin-www responde 200 en vez de 301 y el
-          # sitio queda duplicado para Google.
-          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://planesprepagas.com.ar/")
-          if [ "$code" = "301" ]; then
-            echo "OK: sin-www redirige con 301"
-          else
-            echo "::error::sin-www devolvio $code en vez de 301: el .htaccess no llego al servidor."
+          if [ ! -f "dist/index.html" ]; then
+            echo "::error::Build incompleto: falta dist/index.html"
             exit 1
           fi
+          echo "Build validado ✓"
+          echo "Proximos pasos: deploy manual via MCP desde Claude Code."
