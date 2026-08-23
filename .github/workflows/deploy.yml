@@ -34,3 +34,17 @@ jobs:
           local_path: './dist/*'
           remote_path: '/home/u427298056/domains/planesprepagas.com.ar/public_html/'
           sftp_only: true
+
+      # El paso de arriba sube `./dist/*`, y ese glob NO incluye archivos
+      # ocultos: sin este segundo paso el .htaccess nunca llega al servidor y
+      # el sitio sigue respondiendo 200 en www y sin www a la vez.
+      - name: Deploy .htaccess (el glob de arriba omite los ocultos)
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          username: ${{ secrets.SFTP_USER }}
+          server: ${{ secrets.SFTP_HOST }}
+          port: ${{ secrets.SFTP_PORT }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          local_path: './dist/.htaccess'
+          remote_path: '/home/u427298056/domains/planesprepagas.com.ar/public_html/'
+          sftp_only: true

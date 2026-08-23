@@ -1,0 +1,16 @@
+# Host canónico: todo lo que entre sin www salta a www con un 301.
+#
+# Sin esta regla Apache sirve las dos versiones con 200 y Google ve el sitio
+# entero duplicado, repartiendo la autoridad entre dos URLs por página. La
+# canónica elegida es www porque es la que ya declaran `site` en
+# astro.config.mjs, el sitemap y los <link rel="canonical">.
+#
+# La condición sobre HTTP_HOST es imprescindible: una redirección sin ella se
+# aplica también a www y el sitio queda en un bucle infinito. Ese es
+# exactamente el motivo por el que esto NO se configura desde el panel de
+# Hostinger, cuya herramienta de redirects no distingue el host de origen.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^planesprepagas\.com\.ar$ [NC]
+  RewriteRule ^(.*)$ https://www.planesprepagas.com.ar/$1 [R=301,L]
+</IfModule>

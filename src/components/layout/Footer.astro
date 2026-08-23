@@ -15,6 +15,9 @@ const companies = (await getCollection('companies')).sort((a, b) => a.data.order
 const year = new Date().getFullYear();
 const whatsappHref = buildWhatsAppLink(genericEnquiryMessage());
 
+/* Redes con perfil real cargado en site.ts; las vacías no se listan. */
+const socialLinks = Object.entries(site.social).filter(([, url]) => url);
+
 const institucional = [
   { label: 'Quiénes somos', href: '/quienes-somos' },
   { label: 'Planes para empresas', href: '/empresas' },
@@ -129,22 +132,25 @@ const ayuda = [
         </li>
       </ul>
 
-      <ul class="mt-5 flex gap-4 text-sm">
-        {
-          Object.entries(site.social).map(([network, url]) => (
-            <li>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="capitalize text-navy-100/80 transition hover:text-white"
-              >
-                {network}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {/* Solo las redes con URL cargada. Sin ninguna, no se renderiza la lista. */}
+      {
+        socialLinks.length > 0 && (
+          <ul class="mt-5 flex gap-4 text-sm">
+            {socialLinks.map(([network, url]) => (
+              <li>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="capitalize text-navy-100/80 transition hover:text-white"
+                >
+                  {network}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
     </div>
   </div>
 

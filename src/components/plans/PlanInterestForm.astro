@@ -178,6 +178,8 @@ const hasPlanChoice = (planOptions?.length ?? 0) > 0;
 </section>
 
 <script>
+  import { trackEvent } from '@/lib/analytics';
+
   const section = document.getElementById('consultar');
   const form = document.getElementById('plan-interest-form') as HTMLFormElement | null;
   const status = document.getElementById('pif-status');
@@ -269,8 +271,7 @@ const hasPlanChoice = (planOptions?.length ?? 0) > 0;
 
       const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 
-      const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
-      gtag?.('event', 'generate_lead', {
+      trackEvent('generate_lead', {
         method: 'whatsapp',
         source: 'plan-interest-form',
         plan: planName,

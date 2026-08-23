@@ -50,14 +50,36 @@ export const site = {
    */
   areaServed: 'AR',
 
-  /** TODO: reemplazar por los perfiles reales; borrar los que no se usen. */
+  /**
+   * Perfiles sociales de la marca.
+   *
+   * Vacíos a propósito: una URL vacía no se renderiza en el footer ni entra al
+   * `sameAs` del JSON-LD. Antes apuntaban a las portadas genéricas de cada red,
+   * lo que le declaraba a Google que instagram.com era un perfil nuestro.
+   *
+   * TODO: cargar la URL completa del perfil real de cada red que se use.
+   * Ej: 'https://www.instagram.com/planesprepagas'.
+   */
   social: {
-    instagram: 'https://www.instagram.com/',
-    facebook: 'https://www.facebook.com/',
-    linkedin: 'https://www.linkedin.com/',
+    instagram: '',
+    facebook: '',
+    linkedin: '',
   },
 
-  /** TODO: ID de GA4 ('G-XXXXXXXXXX'). Dejar vacío desactiva la analítica. */
+  /**
+   * ID de GA4 ('G-XXXXXXXXXX') para cargar gtag.js directo, sin GTM.
+   *
+   * Vacío a propósito: la medición entra por Google Tag Manager
+   * (`tracking.gtmId`), y GA4 se configura como etiqueta DENTRO del contenedor.
+   *
+   * NO cargar los dos a la vez. Si GTM ya dispara una etiqueta de GA4 y acá
+   * hay un ID, cada page_view se cuenta dos veces y las métricas quedan al
+   * doble. Este campo solo sirve si algún día se saca GTM del medio.
+   *
+   * La propiedad de GA4 del sitio es `G-Z36TMMESD7`, y vive como etiqueta
+   * dentro del contenedor de GTM. Se anota acá solo para no salir a buscarla:
+   * este campo tiene que seguir vacío.
+   */
   analyticsId: '',
 
   /**
@@ -71,6 +93,17 @@ export const site = {
    * pueden optimizar la entrega hacia quien realmente consulta.
    */
   tracking: {
+    /**
+     * Contenedor de Google Tag Manager ('GTM-XXXXXXX').
+     *
+     * Es la vía de medición del sitio: carga en todas las páginas, incluidas
+     * las landings. GA4, conversiones y cualquier otra etiqueta se administran
+     * desde la interfaz de GTM, sin volver a tocar código.
+     *
+     * Los contactos salientes empujan `generate_lead` al dataLayer: en GTM se
+     * enganchan con un activador de tipo "Evento personalizado" con ese nombre.
+     */
+    gtmId: 'GTM-NNNXJH88',
     /** TODO: ID del píxel de Meta, solo dígitos (ej: '123456789012345'). */
     metaPixelId: '',
     /** TODO: ID de conversión de Google Ads ('AW-XXXXXXXXX'). */

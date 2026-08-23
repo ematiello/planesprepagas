@@ -10,6 +10,8 @@
  *    plataformas ven clics pero no resultados y no pueden optimizar la entrega.
  */
 
+import { trackEvent } from '@/lib/analytics';
+
 /** Parámetros que nos interesan. `gclid`/`fbclid` los agrega la plataforma sola. */
 const TRACKED_PARAMS = [
   'utm_source',
@@ -89,11 +91,15 @@ export function trackLead({ company, plan, googleAdsSendTo }: TrackLeadOptions):
 
   w.fbq?.('track', 'Lead', { content_name: plan ?? company, content_category: company });
 
+  // La conversión de Google Ads sigue yendo por gtag directo: `send_to` es una
+  // llamada propia de gtag.js y solo corre si hay un ID de Ads cargado. Con GTM
+  // en el medio, lo habitual es migrarla a una etiqueta del contenedor y dejar
+  // `tracking.googleAdsId` vacío.
   if (googleAdsSendTo) {
     w.gtag?.('event', 'conversion', { send_to: googleAdsSendTo });
   }
 
-  w.gtag?.('event', 'generate_lead', {
+  trackEvent('generate_lead', {
     method: 'whatsapp',
     source: 'landing',
     company,

@@ -22,7 +22,19 @@ interface Props {
 
 const { title, description, companyName } = Astro.props;
 
-const { metaPixelId, googleAdsId } = site.tracking;
+const { gtmId, metaPixelId, googleAdsId } = site.tracking;
+
+/* Snippet oficial de Google Tag Manager.
+ *
+ * Se arma acá como string y se inyecta con `set:html`: dentro de una expresión
+ * JSX el contenido de un <script> se interpreta como hijos, y el código termina
+ * emitido como texto que nunca se ejecuta. Con set:html sale literal.
+ */
+const gtmSnippet = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`;
 const year = new Date().getFullYear();
 ---
 
@@ -31,6 +43,15 @@ const year = new Date().getFullYear();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/* Google Tag Manager, lo más arriba posible. Las landings son las páginas
+        que más importa medir: pagamos cada visita. */}
+    {
+      gtmId && (
+        <script is:inline set:html={gtmSnippet} />
+      )
+    }
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     {/* Sin canonical y con noindex: la versión indexable es /companias/[slug]. */}
@@ -44,6 +65,11 @@ const year = new Date().getFullYear();
     <meta property="og:locale" content="es_AR" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    {/* noindex no impide que alguien reenvíe el link por WhatsApp: la vista
+        previa igual necesita imagen. */}
+    <meta property="og:image" content={new URL('/og.jpg', Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     {
       site.analyticsId && (
@@ -117,6 +143,20 @@ const year = new Date().getFullYear();
   </head>
 
   <body class="flex min-h-screen flex-col bg-surface">
+    {
+      gtmId && (
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+            height="0"
+            width="0"
+            style="display:none;visibility:hidden"
+            title="Google Tag Manager"
+          />
+        </noscript>
+      )
+    }
+
     <a
       href="#contenido"
       class="sr-only rounded-lg focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-navy-900 focus:px-4 focus:py-2 focus:text-white"

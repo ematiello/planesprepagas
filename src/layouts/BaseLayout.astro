@@ -19,6 +19,28 @@ const { title, description, schema, isHome = false } = Astro.props;
 const pageTitle = isHome ? title : `${title} | ${site.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
+/* Imagen para las previsualizaciones al compartir (WhatsApp, Facebook, X,
+   LinkedIn). Tiene que ser absoluta: los scrapers no resuelven rutas relativas. */
+const ogImage = new URL('/og.jpg', Astro.site).href;
+
+/* Solo los perfiles con URL cargada. Un `sameAs` con la portada de instagram.com
+   le declara a Google que ese perfil genérico es nuestro. */
+const sameAs = Object.values(site.social).filter(Boolean);
+
+const { gtmId } = site.tracking;
+
+/* Snippet oficial de Google Tag Manager.
+ *
+ * Se arma acá como string y se inyecta con `set:html`: dentro de una expresión
+ * JSX el contenido de un <script> se interpreta como hijos, y el código termina
+ * emitido como texto que nunca se ejecuta. Con set:html sale literal.
+ */
+const gtmSnippet = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`;
+
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -32,7 +54,7 @@ const organizationSchema = {
   // Sin `address`: no hay atención presencial, así que no declaramos domicilio.
   // `areaServed` cubre el dato geográfico que los buscadores sí necesitan.
   areaServed: { '@type': 'Country', name: site.areaServed },
-  sameAs: Object.values(site.social),
+  ...(sameAs.length > 0 && { sameAs }),
 };
 ---
 
@@ -41,6 +63,17 @@ const organizationSchema = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/* Google Tag Manager. Va lo más arriba posible del <head>: cuanto más
+        tarde carga el contenedor, más eventos de los primeros milisegundos se
+        pierden. Solo el charset y el viewport quedan por encima, porque el
+        navegador necesita leerlos antes que cualquier script. */}
+    {
+      gtmId && (
+        <script is:inline set:html={gtmSnippet} />
+      )
+    }
+
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -53,10 +86,15 @@ const organizationSchema = {
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -78,6 +116,7 @@ const organizationSchema = {
             function gtag() {
               window.dataLayer.push(arguments);
             }
+            window.gtag = gtag;
             gtag('js', new Date());
             gtag('config', analyticsId);
           </script>
@@ -87,6 +126,20 @@ const organizationSchema = {
   </head>
 
   <body class="flex min-h-screen flex-col">
+    {
+      gtmId && (
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+            height="0"
+            width="0"
+            style="display:none;visibility:hidden"
+            title="Google Tag Manager"
+          />
+        </noscript>
+      )
+    }
+
     <a
       href="#contenido"
       class="sr-only rounded-lg focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-navy-900 focus:px-4 focus:py-2 focus:text-white"
@@ -104,19 +157,19 @@ const organizationSchema = {
     <WhatsAppFloatingButton />
 
     <script>
-      // Registra los contactos salientes como conversión, si GA4 está configurado.
-      // El prefijo del data-analytics ("whatsapp-hero", "email-footer") define el
-      // canal, así que sumar uno nuevo no requiere tocar este script.
+      // Registra los contactos salientes como conversión. El prefijo del
+      // data-analytics ("whatsapp-hero", "email-footer") define el canal, así
+      // que sumar uno nuevo no requiere tocar este script.
+      //
+      // La vía de emisión (dataLayer de GTM o gtag.js) la decide trackEvent.
+      import { trackEvent } from '@/lib/analytics';
+
       document
         .querySelectorAll('[data-analytics^="whatsapp"], [data-analytics^="email"]')
         .forEach((link) => {
           link.addEventListener('click', () => {
             const source = link.getAttribute('data-analytics') ?? '';
-            const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
-            gtag?.('event', 'generate_lead', {
-              method: source.split('-')[0],
-              source,
-            });
+            trackEvent('generate_lead', { method: source.split('-')[0], source });
           });
         });
     </script>
