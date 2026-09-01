@@ -14,7 +14,7 @@ benefits:
   - Plan materno infantil
   - Servicios digitales de gestión
 featured: true
-order: 2
+order: 1
 verified: false
 seoDescription: 'Plan Integral de Avalian: cartilla nacional amplia con copagos acotados. Compará contra los otros planes de Avalian y consultá gratis.'
 ---
