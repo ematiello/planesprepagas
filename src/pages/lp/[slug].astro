@@ -199,7 +199,16 @@ const faq = [
       <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {
           plans.map((plan) => (
-            <article class="card flex h-full flex-col p-6">
+            <article class="card flex h-full flex-col overflow-hidden p-6">
+              {plan.data.image && (
+                <img
+                  src={plan.data.image}
+                  alt=""
+                  loading="lazy"
+                  class="-mx-6 -mt-6 mb-5 h-40 w-[calc(100%+3rem)] object-cover"
+                  aria-hidden="true"
+                />
+              )}
               <span
                 class="mb-5 block h-1 w-12 rounded-full"
                 style={`background-color: ${company.data.brandColor}`}

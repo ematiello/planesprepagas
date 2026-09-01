@@ -12,6 +12,7 @@ benefits:
   - Servicio de emergencias y urgencias sin cargo
   - Consultas a domicilio con copagos accesibles
   - Descuentos destacados en farmacias adheridas
+image: 'https://avalian.com/uploads/planes/2/cendencial/0001_Cred_digital_descuento_farmacia_AS300.png'
 featured: true
 order: 2
 verified: false

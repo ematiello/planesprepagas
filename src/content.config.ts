@@ -81,6 +81,8 @@ const plans = defineCollection({
     benefits: z.array(z.string()).min(3),
     /** Perfil al que apunta, se muestra como chip. */
     audience: z.string(),
+    /** Imagen de la tarjeta del plan en los listados. */
+    image: z.string().url().optional(),
     /** Destacar en home y arriba del listado. */
     featured: z.boolean().default(false),
     order: z.number().default(99),
