@@ -27,6 +27,9 @@ const plans = (await getCollection('plans', ({ data }) => data.company.id === co
 );
 
 const contact = contactFor(company);
+// Esta landing de Ads usa su propio WhatsApp, distinto del contacto general de
+// la compañía: cada landing de campaña tiene su propia línea.
+contact.whatsappNumber = '5491124891888';
 const whatsappHref = buildWhatsAppLink(
   companyEnquiryMessage(company.data.name),
   contact.whatsappNumber,
