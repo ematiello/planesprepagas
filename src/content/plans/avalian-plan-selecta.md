@@ -13,7 +13,7 @@ benefits:
   - Internación en suite
   - Consultas a domicilio
   - Servicio de emergencias y urgencias sin cargo
-image: 'https://avalian.com/uploads/planes/1/cendencial/0001_Cred_digital_descuento_farmacia_AS500.png'
+image: /images/planes/avalian/plan-selecta.png
 featured: true
 order: 3
 verified: false

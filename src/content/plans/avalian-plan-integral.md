@@ -13,7 +13,7 @@ benefits:
   - Cobertura de urgencias y emergencias
   - Plan materno infantil
   - Servicios digitales de gestión
-image: 'https://avalian.com/uploads/planes/3/cendencial/0001_Cred_digital_descuento_farmacia_AS200.png'
+image: /images/planes/avalian/plan-integral.png
 featured: true
 order: 1
 verified: false
