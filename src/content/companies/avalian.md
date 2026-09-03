@@ -10,13 +10,13 @@ order: 1
 # Preguntas propias de Avalian. No repetir las de src/content/faq/, que son del
 # sitio y ya se publican en /preguntas-frecuentes.
 faq:
-  - question: ¿Qué diferencia hay entre el Plan Cerca, el Integral y el Hoy?
+  - question: ¿Qué diferencia hay entre el Plan Integral, el Superior y el Selecta?
     answer: >-
-      Cambian tres cosas: el alcance de la cartilla, el esquema de copagos y los
-      beneficios adicionales. El Cerca arma la red por cercanía geográfica y prioriza la
-      cuota; el Integral abre la cartilla a todo el país con copagos acotados; el Hoy
-      apunta a jóvenes adultos y suma beneficios de estilo de vida. Contanos tu caso y
-      te decimos cuál corresponde.
+      Cambian el nivel de internación, el alcance de las coberturas y los copagos. El
+      Integral es el punto medio: cartilla nacional amplia con copagos acotados; el
+      Superior suma internación en habitación individual con baño privado y consultas a
+      domicilio; el Selecta es el de mayor jerarquía, con internación en suite y acceso a
+      cirugías estéticas. Contanos tu caso y te decimos cuál corresponde.
   - question: ¿Avalian tiene cobertura en todo el país?
     answer: >-
       Avalian tiene presencia nacional, pero la red efectiva depende del plan y de la
