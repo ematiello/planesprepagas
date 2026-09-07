@@ -30,6 +30,11 @@ const contact = contactFor(company);
 // Esta landing de Ads usa su propio WhatsApp, distinto del contacto general de
 // la compañía: cada landing de campaña tiene su propia línea.
 contact.whatsappNumber = '5491124891888';
+// Teléfono propio solo de la landing de Avalian: no debe heredarlo la landing
+// de otra compañía que se sume más adelante.
+if (company.id === 'avalian') {
+  contact.phone = { label: '+54 9 11 2489-1888', href: 'tel:+5491124891888' };
+}
 const whatsappHref = buildWhatsAppLink(
   companyEnquiryMessage(company.data.name),
   contact.whatsappNumber,
