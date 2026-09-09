@@ -6,9 +6,11 @@ import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 /**
  * Formulario de captación de la landing.
  *
- * Cuatro campos y nada más: cada campo extra baja la conversión, y estos cuatro
- * son los que efectivamente cambian qué plan corresponde recomendar. El resto
- * se pregunta en la conversación de WhatsApp, que ya está abierta.
+ * Seis campos: los cuatro originales (nombre, teléfono, provincia, para
+ * quién) más cantidad de personas y situación laboral, que son los dos datos
+ * que más cambian qué plan y qué esquema de aportes corresponde recomendar
+ * (ver la FAQ de derivación de aportes). El resto se pregunta en la
+ * conversación de WhatsApp, que ya está abierta.
  *
  * A diferencia de `PlanInterestForm`, este adjunta el origen de campaña al
  * mensaje y notifica la conversión a Meta y Google Ads.
@@ -129,6 +131,48 @@ const isHero = variant === 'hero';
       </div>
     </div>
 
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label for={`${id}-group-size`} class="text-sm font-semibold text-ink">
+          ¿Cuántas personas? <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+        </label>
+        <select
+          id={`${id}-group-size`}
+          name="groupSize"
+          required
+          class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+        >
+          <option value="">Elegí una</option>
+          <option value="1 persona">1 persona</option>
+          <option value="2 personas">2 personas</option>
+          <option value="3 personas">3 personas</option>
+          <option value="4 personas">4 personas</option>
+          <option value="5 o más personas">5 o más personas</option>
+        </select>
+        <p class="hidden text-xs font-semibold text-red-700" data-error-for="groupSize"></p>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for={`${id}-employment`} class="text-sm font-semibold text-ink">
+          Situación laboral <span class="text-amber-brand-dark" aria-hidden="true">*</span>
+        </label>
+        <select
+          id={`${id}-employment`}
+          name="employmentStatus"
+          required
+          class="rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-sm text-ink"
+        >
+          <option value="">Elegí una</option>
+          <option value="Relación de dependencia (recibo de sueldo)">
+            Relación de dependencia (recibo de sueldo)
+          </option>
+          <option value="Monotributista">Monotributista</option>
+          <option value="Particular / sin aportes">Particular / sin aportes</option>
+        </select>
+        <p class="hidden text-xs font-semibold text-red-700" data-error-for="employmentStatus"></p>
+      </div>
+    </div>
+
     {/* Oculto pero enviado: permite que un CTA de un plan puntual prellene el interés. */}
     <input type="hidden" name="plan" value="" data-plan-field />
 
@@ -176,6 +220,8 @@ const isHero = variant === 'hero';
     phone: 'Escribí un teléfono de contacto (al menos 8 dígitos).',
     province: 'Elegí tu provincia.',
     coverage: 'Indicá para quién es la cobertura.',
+    groupSize: 'Indicá cuántas personas cubre.',
+    employmentStatus: 'Indicá tu situación laboral.',
     consent: 'Necesitamos tu conformidad para poder contactarte.',
   };
 
@@ -207,6 +253,8 @@ const isHero = variant === 'hero';
       const rawPhone = String(data.get('phone') ?? '').trim();
       const province = String(data.get('province') ?? '');
       const coverage = String(data.get('coverage') ?? '');
+      const groupSize = String(data.get('groupSize') ?? '');
+      const employmentStatus = String(data.get('employmentStatus') ?? '');
       const plan = String(data.get('plan') ?? '').trim();
       const consent = data.get('consent') === 'on';
 
@@ -216,6 +264,8 @@ const isHero = variant === 'hero';
       if (rawPhone.replace(/\D/g, '').length < 8) invalid.push('phone');
       if (!province) invalid.push('province');
       if (!coverage) invalid.push('coverage');
+      if (!groupSize) invalid.push('groupSize');
+      if (!employmentStatus) invalid.push('employmentStatus');
       if (!consent) invalid.push('consent');
 
       if (invalid.length > 0) {
@@ -248,6 +298,8 @@ const isHero = variant === 'hero';
         `Teléfono: ${rawPhone}`,
         `Provincia: ${province}`,
         `Cobertura: ${coverage}`,
+        `Cantidad de personas: ${groupSize}`,
+        `Situación laboral: ${employmentStatus}`,
       ];
       const origin = campaignSummary(campaign);
       if (origin) lines.push('', origin);
