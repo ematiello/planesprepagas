@@ -30,7 +30,7 @@ const {
   planOptions,
   variant = 'section',
   id = 'consultar',
-  heading = `Pedí tu cuota de ${Astro.props.companyName}`,
+  heading = `Pedí información de ${Astro.props.companyName}`,
 } = Astro.props;
 
 const { googleAdsId, googleAdsLabel } = site.tracking;
@@ -55,8 +55,8 @@ const isHero = variant === 'hero';
     {heading}
   </h2>
   <p class="mt-2 text-sm leading-relaxed text-ink-muted">
-    Completá tus datos y te pasamos el valor y la cobertura que aplican a tu caso.
-    {site.phones.hours}.
+    Completá tus datos y te enviamos información sobre el valor y la cobertura que
+    aplican a tu caso. {site.phones.hours}.
   </p>
 
   <form class="mt-5 grid gap-4" novalidate data-form>
@@ -153,7 +153,7 @@ const isHero = variant === 'hero';
 
     <button type="submit" class="btn btn-whatsapp w-full">
       <WhatsAppIcon />
-      Quiero una cotización
+      Quiero recibir información
     </button>
 
     <p class="text-center text-xs text-ink-muted">
@@ -237,8 +237,8 @@ const isHero = variant === 'hero';
       // Coincide con el CTA que el visitante tocó: si el mensaje que se abre
       // dice otra cosa, la conversación arranca con una desconexión.
       const greeting = plan
-        ? `¡Hola! Quiero pedir una cotización del ${plan} de ${companyName}.`
-        : `¡Hola! Quiero pedir una cotización de ${companyName}.`;
+        ? `¡Hola! Quiero recibir información del ${plan} de ${companyName}.`
+        : `¡Hola! Quiero recibir información de ${companyName}.`;
 
       // El origen va al final para que lo primero que lea el asesor sea la consulta.
       const lines = [
