@@ -280,40 +280,6 @@ const faq = [
     </div>
   </section>
 
-  {/*
-    Identidad y relación con la compañía, con la misma jerarquía visual que el
-    resto de la página. No alcanza con que esto viva en el FAQ colapsado o en
-    la letra chica del footer: es la respuesta a "¿con quién estoy hablando y
-    quién me va a cobrar?", y tiene que verse sin que el visitante la busque.
-  */}
-  <section class="section">
-    <div class="container-page">
-      <h2 class="text-center text-3xl md:text-4xl">¿Quién es quién acá?</h2>
-      <div class="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2">
-        <div class="card p-6">
-          <h3 class="font-display text-lg font-extrabold text-navy-900">
-            {site.name}
-          </h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink-muted">
-            Somos un intermediario independiente. Te asesoramos para elegir el plan que
-            corresponde a tu caso y gestionamos el trámite de alta. No somos{' '}
-            {company.data.name} ni formamos parte de esa compañía.
-          </p>
-        </div>
-        <div class="card p-6">
-          <h3 class="font-display text-lg font-extrabold text-navy-900">
-            {company.data.name}
-          </h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink-muted">
-            Es la compañía de medicina prepaga que presta la cobertura. Define la
-            cartilla, las prestaciones, los valores y la aceptación de cada solicitud de
-            afiliación. El contrato se firma con {company.data.name}, no con nosotros.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="border-y border-hairline bg-canvas py-14 md:py-20">
     <div class="container-page">
       <h2 class="text-center text-3xl md:text-4xl">
