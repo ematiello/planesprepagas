@@ -1,6 +1,6 @@
 ---
 import '@/styles/global.css';
-import { site, legalNav } from '@/config/site';
+import { site, legalNav, identity } from '@/config/site';
 
 /**
  * Layout de las landings de campaña. Difiere del BaseLayout a propósito:
@@ -198,16 +198,44 @@ const year = new Date().getFullYear();
           </li>
         </ul>
 
+        {/*
+          Descargo de no-afiliación. Dice "asesor independiente" y no "promotor":
+          "promotor" sugiere un rol comercial delegado por la compañía, que es
+          justamente el vínculo que no está documentado y que Google reprocha
+          afirmar sin poder probarlo.
+
+          Es el refuerzo del aviso que ya aparece arriba de todo en la landing:
+          acá abajo repite, no estrena.
+        */}
         <p class="max-w-4xl text-xs leading-relaxed text-ink-muted">
-          {site.name} es un promotor independiente y no forma parte de {companyName}.
-          Los planes exhibidos pertenecen a {companyName}, que es quien presta el servicio
-          de salud. Las condiciones, coberturas, carencias y valores definitivos son los
-          que establece el contrato de la compañía. {companyName} y su denominación
+          <strong class="font-semibold text-ink">
+            Este sitio pertenece a {site.name} y no es el sitio oficial de {companyName}.
+          </strong>{' '}
+          {site.name} es un asesor independiente en medicina prepaga: informa sobre los
+          planes de {companyName} y no forma parte de esa compañía, no la representa ni
+          actúa en su nombre. Los planes exhibidos pertenecen a {companyName}, que es
+          quien presta el servicio de salud, define las condiciones y percibe la cuota.
+          Las condiciones, coberturas, carencias y valores definitivos son los que
+          establece el contrato de la compañía. {companyName} y su denominación
           pertenecen a su titular y se citan con fines identificatorios.
         </p>
 
+        {/* Identidad del titular: quién responde por este sitio, con nombre y CUIT. */}
+        {
+          identity.isComplete && (
+            <p class="text-xs leading-relaxed text-ink-muted">
+              Titular del sitio: <strong class="font-semibold text-ink">{identity.legalName}</strong>{' '}
+              — CUIT/CUIL {identity.taxId} — {identity.location}. Contacto:{' '}
+              <a href={`mailto:${site.email}`} class="underline underline-offset-2">
+                {site.email}
+              </a>
+              .
+            </p>
+          )
+        }
+
         <p class="text-xs text-ink-muted/80">
-          © {year} {site.legalName} — Todos los derechos reservados.
+          © {year} {identity.displayName} — Todos los derechos reservados.
         </p>
       </div>
     </footer>

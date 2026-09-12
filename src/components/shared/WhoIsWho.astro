@@ -1,0 +1,103 @@
+---
+import { site } from '@/config/site';
+
+/**
+ * "Quién es quién": la respuesta a *"¿con quién estoy hablando y quién me va a
+ * cobrar?"*, con jerarquía visual propia.
+ *
+ * Esta sección existió, se quitó en el commit bba49a5 ("Quita la seccion 'Quien
+ * es quien aca'") y la apelación de Google Ads se presentó sin ella. Vuelve, y
+ * vuelve como componente para que la misma explicación se sirva idéntica en la
+ * landing de campaña y en la página de compañía — antes cada página decía lo
+ * suyo y las versiones no coincidían entre sí.
+ *
+ * No es decorativa ni "letra chica de compliance": Google revisa anuncios,
+ * sitio y cuenta en conjunto, y un revisor no debería tener que abrir un
+ * acordeón para entender la relación comercial. Si se vuelve a quitar, se
+ * reabre exactamente el motivo del rechazo.
+ */
+interface Props {
+  companyName: string;
+  /** Sitio oficial de la compañía. Si se pasa, se enlaza. */
+  companyWebsite?: string;
+  /** `plain` la deja sobre el fondo de la sección; `card` la encierra en tarjetas. */
+  variant?: 'card' | 'plain';
+}
+
+const { companyName, companyWebsite, variant = 'card' } = Astro.props;
+---
+
+<section class="section" aria-labelledby="quien-es-quien">
+  <div class="container-page">
+    <h2 id="quien-es-quien" class="text-center text-3xl md:text-4xl">Quién es quién acá</h2>
+    <p class="mx-auto mt-3 max-w-2xl text-center text-base leading-relaxed text-ink-muted">
+      Antes de dejarnos tus datos, conviene que tengas claro con quién estás hablando y
+      con quién vas a firmar.
+    </p>
+
+    <div class="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2">
+      <div class:list={[variant === 'card' ? 'card p-6' : 'p-6', 'border-l-4 border-amber-brand']}>
+        <p class="text-xs font-bold uppercase tracking-wider text-amber-brand-dark">
+          Este sitio
+        </p>
+        <h3 class="mt-2 font-display text-lg font-extrabold text-navy-900">
+          {site.name}
+        </h3>
+        <ul class="mt-4 flex flex-col gap-2.5 text-sm leading-relaxed text-ink-muted">
+          <li>Somos asesores independientes en medicina prepaga.</li>
+          <li>
+            Te informamos sobre los planes de {companyName}, comparamos alternativas y
+            respondemos tus dudas.
+          </li>
+          <li>
+            Si decidís avanzar, te acompañamos en la gestión de la solicitud ante la
+            compañía.
+          </li>
+          <li>
+            <strong class="text-ink">No somos {companyName}</strong>, no formamos parte
+            de esa compañía y este no es su sitio oficial.
+          </li>
+          <li>No cobramos nada por asesorarte y no facturamos la cuota.</li>
+        </ul>
+      </div>
+
+      <div class:list={[variant === 'card' ? 'card p-6' : 'p-6', 'border-l-4 border-hairline']}>
+        <p class="text-xs font-bold uppercase tracking-wider text-ink-muted">
+          La compañía
+        </p>
+        <h3 class="mt-2 font-display text-lg font-extrabold text-navy-900">
+          {companyName}
+        </h3>
+        <ul class="mt-4 flex flex-col gap-2.5 text-sm leading-relaxed text-ink-muted">
+          <li>Es la empresa de medicina prepaga que presta la cobertura.</li>
+          <li>Define la cartilla, las prestaciones, las carencias y el valor de la cuota.</li>
+          <li>Decide si acepta o rechaza cada solicitud de afiliación.</li>
+          <li>
+            <strong class="text-ink">El contrato se firma con {companyName}</strong> y es
+            la compañía quien te factura y te cobra.
+          </li>
+          <li>La atención médica y las autorizaciones se tramitan por sus canales.</li>
+        </ul>
+
+        {/*
+          Enlace al sitio oficial de la compañía. Contraintuitivo para una
+          landing paga —es una salida— pero es la prueba más directa de que no
+          nos hacemos pasar por ella: si alguien busca el sitio oficial, se lo
+          damos en vez de retenerlo.
+        */}
+        {companyWebsite && (
+          <p class="mt-5 border-t border-hairline pt-4 text-sm">
+            <a
+              href={companyWebsite}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="font-semibold text-navy-900 underline underline-offset-4 hover:text-amber-brand-dark"
+            >
+              Ir al sitio oficial de {companyName} →
+            </a>
+          </p>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

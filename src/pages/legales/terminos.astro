@@ -1,12 +1,13 @@
 ---
 import LegalLayout from '@/layouts/LegalLayout.astro';
-import { site } from '@/config/site';
+import { site, identity } from '@/config/site';
+import LegalIdentity from '@/components/shared/LegalIdentity.astro';
 ---
 
 <LegalLayout
   title="Términos y condiciones del sitio"
   description="Condiciones de uso del sitio web, alcance de la información publicada y limitaciones de responsabilidad."
-  lastUpdated="Febrero de 2026"
+  lastUpdated="Septiembre de 2026"
 >
   <h2>Aceptación</h2>
   <p>
@@ -15,18 +16,30 @@ import { site } from '@/config/site';
   </p>
 
   <h2>Titular del sitio</h2>
-  <p>
-    <strong>{site.legalName}</strong> ({site.name}). La atención es exclusivamente a
-    distancia; el canal de contacto es{' '}
-    <a href={`mailto:${site.email}`}>{site.email}</a> y el teléfono{' '}
-    {site.phones.sales.label}.
+  <LegalIdentity title="Titular del sitio" />
+  <p class="mt-4">
+    La atención es exclusivamente a distancia; los canales de contacto son{' '}
+    <a href={`mailto:${site.email}`}>{site.email}</a>, el teléfono{' '}
+    {site.phones.sales.label} y, para las consultas que llegan desde nuestras campañas
+    publicitarias, la línea {site.campaignLine.label}. Ambas líneas pertenecen al mismo
+    titular.
   </p>
 
   <h2>Objeto y alcance</h2>
   <p>
-    Este sitio tiene finalidad informativa y de contacto. Presenta los planes de medicina
-    prepaga de las compañías que representamos y canaliza consultas. {site.name} es un
-    intermediario independiente y no forma parte de ninguna de ellas.
+    Este sitio tiene finalidad informativa y de contacto. Presenta información sobre
+    planes de medicina prepaga de terceros y canaliza consultas de personas interesadas.
+  </p>
+  <p>
+    <strong>
+      {site.name} es un asesor independiente en medicina prepaga. No es una empresa de
+      medicina prepaga, no forma parte de las compañías cuyos planes publica, no las
+      representa ni actúa en su nombre, y ninguna de ellas respalda ni patrocina este
+      sitio.
+    </strong>{' '}
+    Este no es el sitio oficial de ninguna de esas compañías. Nuestra actividad consiste
+    en informar, comparar y asesorar sobre las coberturas disponibles y, a pedido del
+    interesado, acompañarlo en la gestión de su solicitud ante la compañía que elija.
   </p>
   <p>
     El contenido <strong>no constituye una oferta contractual</strong> ni asegura la
@@ -60,7 +73,7 @@ import { site } from '@/config/site';
 
   <h2>Propiedad intelectual</h2>
   <p>
-    Los textos, el diseño y el código de este sitio pertenecen a {site.legalName}. Las
+    Los textos, el diseño y el código de este sitio pertenecen a {identity.displayName}. Las
     marcas y denominaciones de las compañías citadas pertenecen a sus respectivos
     titulares y se usan con fines identificatorios.
   </p>

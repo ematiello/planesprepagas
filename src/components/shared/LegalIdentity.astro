@@ -1,0 +1,88 @@
+---
+import { site, identity } from '@/config/site';
+
+/**
+ * Ficha de identidad del titular del sitio.
+ *
+ * Google Ads rechazó la cuenta por, entre otros motivos, "ocultar o tergiversar
+ * la identidad de la empresa". Hasta acá el sitio se firmaba con el dominio
+ * ('planesprepagas.com.ar') en lugar de una persona identificable, y
+ * `/quienes-somos` no contenía un solo dato verificable.
+ *
+ * Este bloque es la respuesta a eso: nombre del titular, CUIT/CUIL, figura,
+ * localidad y canales de contacto, servidos desde `site.ts` para que la misma
+ * ficha aparezca idéntica en quiénes somos, contacto y los dos legales. Si un
+ * dato falta, `identity.isComplete` es false y no se renderiza una ficha a
+ * medias — que es peor que no tenerla.
+ */
+interface Props {
+  /** `full` incluye contacto; `compact` solo los datos registrales. */
+  variant?: 'full' | 'compact';
+  title?: string;
+}
+
+const { variant = 'full', title = 'Datos del titular del sitio' } = Astro.props;
+
+const rows = [
+  { label: 'Titular', value: identity.legalName },
+  { label: 'CUIT / CUIL', value: identity.taxId },
+  { label: 'Condición', value: identity.form },
+  { label: 'Nombre comercial', value: site.name },
+  { label: 'Localidad', value: identity.location },
+];
+---
+
+{
+  identity.isComplete && (
+    <div class="card p-6 md:p-7">
+      <h2 class="font-display text-lg font-extrabold text-navy-900">{title}</h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+        {site.name} es el nombre comercial con el que opera el titular que figura acá
+        abajo. No somos una empresa de medicina prepaga ni formamos parte de ninguna.
+      </p>
+
+      <dl class="mt-5 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+        {rows.map((row) => (
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+              {row.label}
+            </dt>
+            <dd class="font-medium text-ink">{row.value}</dd>
+          </div>
+        ))}
+
+        {variant === 'full' && (
+          <>
+            <div class="flex flex-col gap-0.5">
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                Correo
+              </dt>
+              <dd class="font-medium text-ink">
+                <a href={`mailto:${site.email}`} class="underline underline-offset-2">
+                  {site.email}
+                </a>
+              </dd>
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                Teléfono
+              </dt>
+              <dd class="font-medium text-ink">
+                <a href={site.phones.sales.href} class="underline underline-offset-2">
+                  {site.phones.sales.label}
+                </a>
+              </dd>
+            </div>
+          </>
+        )}
+      </dl>
+
+      {variant === 'full' && (
+        <p class="mt-5 border-t border-hairline pt-4 text-xs leading-relaxed text-ink-muted">
+          La atención es exclusivamente a distancia (teléfono, correo y WhatsApp), por eso
+          se publica la localidad y no un domicilio de atención al público.
+        </p>
+      )}
+    </div>
+  )
+}

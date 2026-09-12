@@ -4,6 +4,7 @@ import type { GetStaticPaths } from 'astro';
 import LandingLayout from '@/layouts/LandingLayout.astro';
 import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import LeadForm from '@/components/landing/LeadForm.astro';
+import WhoIsWho from '@/components/shared/WhoIsWho.astro';
 import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 import { site } from '@/config/site';
 import { contactFor } from '@/lib/contact';
@@ -27,48 +28,54 @@ const plans = (await getCollection('plans', ({ data }) => data.company.id === co
 );
 
 const contact = contactFor(company);
-// Esta landing de Ads usa su propio WhatsApp, distinto del contacto general de
-// la compañía: cada landing de campaña tiene su propia línea.
-contact.whatsappNumber = '5491124891888';
-// Teléfono propio solo de la landing de Avalian: no debe heredarlo la landing
-// de otra compañía que se sume más adelante.
-if (company.id === 'avalian') {
-  contact.phone = { label: '+54 9 11 2489-1888', href: 'tel:+5491124891888' };
-}
+/*
+ * Las landings de campaña se atienden con una línea dedicada, distinta de la
+ * general del sitio: separa el volumen que llega por publicidad paga del que
+ * llega por el sitio.
+ *
+ * El número vive en `site.campaignLine` y no acá: /contacto lo publica y
+ * explica por qué hay dos líneas en el mismo dominio. Dos números sin
+ * explicación es una incoherencia de identidad que un revisor de Google
+ * interpreta como dos empresas distintas.
+ */
+contact.whatsappNumber = site.campaignLine.whatsappNumber;
+contact.phone = { label: site.campaignLine.label, href: site.campaignLine.href };
 const whatsappHref = buildWhatsAppLink(
   companyEnquiryMessage(company.data.name),
   contact.whatsappNumber,
 );
 const planNames = plans.map((plan) => plan.data.name);
 
-/* Beneficios de la cobertura, no de nuestro servicio: en tráfico frío el
-   visitante todavía no sabe qué es Avalian, y menos quiénes somos nosotros. */
+/* Qué vas a encontrar en esta página. Antes esta lista mezclaba beneficios de
+   la cobertura con servicios nuestros, en una voz única que no dejaba ver quién
+   ofrecía cada cosa. Ahora cada punto dice de quién es lo que promete. */
 const trustPoints = [
-  `Red de prestadores en todo el país, con cartilla según el plan que elijas.`,
-  'Planes para individuos, grupo familiar, monotributistas y empresas.',
-  'Podés derivar los aportes de tu obra social y reducir la cuota mensual.',
-  'Te acompañamos en todo el trámite de alta, sin cargo sobre la cuota.',
+  `${company.data.name} tiene red de prestadores en todo el país; la cartilla efectiva depende del plan y de la zona.`,
+  `Hay planes de ${company.data.name} para personas, grupo familiar, monotributistas y empresas.`,
+  'Según tu situación registral, puede corresponder derivar los aportes de tu obra social. Te explicamos si aplica a tu caso.',
+  `Nuestro asesoramiento no tiene costo y no modifica el valor de la cuota que fija ${company.data.name}.`,
 ];
 
 const steps = [
   {
-    title: 'Dejás tus datos',
-    body: 'Cuatro campos y listo. Se abre WhatsApp con tu consulta ya escrita.',
+    title: 'Nos dejás tus datos',
+    body: 'Completás el formulario y se abre WhatsApp con tu consulta ya escrita. Te atiende un asesor de Planes Prepagas, no de la compañía.',
   },
   {
     title: 'Recibís la información',
-    body: `Te compartimos el valor y los detalles de cobertura según tu edad, tu grupo familiar y el plan de ${company.data.name} que mejor encaje.`,
+    body: `Te explicamos cobertura, carencias y valores de referencia de los planes de ${company.data.name} que apliquen a tu edad y a tu grupo familiar. Sin compromiso.`,
   },
   {
-    title: 'Te asociás',
-    body: 'Preparamos la documentación y seguimos el trámite hasta que la cobertura esté activa.',
+    title: 'Decidís vos',
+    body: `Si querés avanzar, te acompañamos a armar la solicitud. El alta la resuelve ${company.data.name}: es la compañía quien acepta o rechaza cada solicitud y con quien firmás el contrato.`,
   },
 ];
 
 /*
- * FAQ de objeciones sobre la cobertura, no sobre nosotros. La última pregunta
- * es la que identifica al comercializador: va acá, y no en el encabezado,
- * porque a esa altura el visitante ya entendió qué está contratando.
+ * FAQ. Las tres últimas preguntas son de identidad ("¿es el sitio oficial?",
+ * "¿quién cobra?", "¿qué pasa con mis datos?") y son deliberadamente explícitas:
+ * antes esa información vivía en una sola pregunta al final de un acordeón
+ * cerrado, que es donde Google no la considera visible.
  */
 const faq = [
   {
@@ -84,46 +91,85 @@ const faq = [
     a: 'Habitualmente desde la fecha de alta que confirma la compañía. Algunas prestaciones tienen períodos de carencia y las condiciones preexistentes se evalúan a partir de la declaración jurada de salud.',
   },
   {
-    q: '¿Pago más por asociarme desde acá?',
-    a: `No. La cuota es la que fija ${company.data.name} según el plan, la edad y el grupo familiar. Asociarte con nuestra gestión no agrega recargos ni honorarios.`,
+    q: '¿Pago más por consultar desde acá?',
+    a: `No. La cuota es la que fija ${company.data.name} según el plan, la edad y el grupo familiar. Nuestro asesoramiento no agrega recargos ni honorarios: no te cobramos nada y no facturamos la cuota.`,
   },
   {
-    q: `¿Quién presta la cobertura?`,
-    a: `${company.data.name}. Nosotros somos ${site.name}, un intermediario independiente que brinda asesoramiento y gestiona solicitudes relacionadas con los planes de ${company.data.name}. La atención médica y el contrato son con ${company.data.name}.`,
+    q: `¿Este es el sitio oficial de ${company.data.name}?`,
+    a: `No. Este sitio pertenece a ${site.name} y no es el sitio oficial de ${company.data.name}. Somos asesores independientes: informamos sobre sus planes y respondemos consultas. No formamos parte de ${company.data.name} ni tenemos su representación. El sitio oficial de la compañía es ${company.data.website}.`,
+  },
+  {
+    q: `¿Quién presta la cobertura y quién me cobra?`,
+    a: `${company.data.name} en los dos casos. La compañía presta la cobertura, define la cartilla y los valores, emite la factura y cobra la cuota. ${site.name} solo asesora e informa: el contrato lo firmás con ${company.data.name}, no con nosotros.`,
+  },
+  {
+    q: '¿Qué pasa con los datos que dejo en el formulario?',
+    a: `El formulario no guarda nada en este sitio: arma un mensaje y abre WhatsApp en tu teléfono, y sos vos quien decide enviarlo. Los recibe ${site.name} para responder tu consulta. Si más adelante pedís avanzar con una solicitud, los datos necesarios se comparten con ${company.data.name}. Está detallado en nuestra política de privacidad.`,
   },
 ];
 ---
 
 <LandingLayout
-  title={`Planes de ${company.data.name} — Información y asesoramiento`}
-  description={`Información sobre los planes de ${company.data.name}: conocé la cobertura disponible y recibí asesoramiento personalizado según tu grupo familiar.`}
+  title={`Planes de ${company.data.name}: información y asesoramiento | ${site.name}`}
+  description={`${site.name}, asesores independientes en medicina prepaga, te explica los planes de ${company.data.name}: qué cubre cada uno y en qué se diferencian. Sitio no oficial de ${company.data.name}.`}
   companyName={company.data.name}
 >
   {/*
-    Encabezado con la marca del producto al frente y el vendedor identificado en
-    bajada. Es el patrón del concesionario oficial: la marca vende, pero queda
-    claro quién es el comercializador.
+    Encabezado con NUESTRA identidad al frente, no la de la compañía.
 
-    La bajada no es decorativa — Meta y Google Ads suspenden cuentas por
-    tergiversación cuando el destino aparenta ser el sitio oficial de la marca.
+    La versión anterior invertía esto: mostraba el logo de Avalian a la
+    izquierda y relegaba "Planes Prepagas" a un <span class="hidden ... sm:block">,
+    es decir, oculto por debajo de 640 px. En mobile —de donde viene la mayor
+    parte del tráfico de Ads— la primera pantalla del destino era el logo de
+    Avalian y nada más. Ese es, textualmente, el patrón que Google Ads sanciona
+    como "hacer parecer que es el sitio oficial de otra marca".
+
+    Ahora el monograma y el nombre propio son lo primero, se ven en TODOS los
+    breakpoints, y el logo de la compañía no vive en el header: aparece más
+    abajo, etiquetado como el tema del que informamos.
   */}
   <header class="border-b border-hairline bg-white">
-    <div class="container-page flex items-center justify-between gap-4 py-3">
-      <span class="flex items-center gap-3">
-        <CompanyLogo company={company} height={34} decorative eager />
-        <span class="hidden text-[0.7rem] leading-tight text-ink-muted sm:block">
-          Información y asesoramiento de<br />
-          <strong class="font-semibold text-ink">{site.name}</strong>
+    <div class="container-page flex items-center justify-between gap-3 py-3">
+      <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} — Inicio`}>
+        <span
+          class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-navy-900 font-display text-sm font-extrabold text-white"
+          aria-hidden="true">PP</span
+        >
+        <span class="leading-tight">
+          <span class="block font-display text-base font-extrabold text-navy-900">
+            {site.name}
+          </span>
+          <span class="block text-[0.65rem] uppercase tracking-[0.14em] text-ink-muted">
+            Asesores independientes
+          </span>
         </span>
-      </span>
+      </a>
       <a
         href={contact.phone.href}
-        class="font-display text-sm font-bold text-navy-900 hover:text-amber-brand-dark"
+        class="shrink-0 font-display text-sm font-bold text-navy-900 hover:text-amber-brand-dark"
       >
         {contact.phone.label}
       </a>
     </div>
   </header>
+
+  {/*
+    Aclaración de no-afiliación en la primera pantalla, no en el pie.
+
+    Va acá arriba y con contraste suficiente para leerse de un vistazo: es la
+    frase que un revisor de Google —o un usuario que llegó desde un anuncio—
+    tiene que poder ver sin scrollear ni abrir nada.
+  */}
+  <div class="border-b border-amber-brand/30 bg-amber-brand/10">
+    <div class="container-page py-2.5">
+      <p class="text-center text-xs leading-relaxed text-ink md:text-[0.8rem]">
+        <strong class="font-semibold">Este sitio pertenece a {site.name}</strong> y
+        <strong class="font-semibold">no es el sitio oficial de {company.data.name}</strong>.
+        Somos asesores independientes: informamos sobre sus planes. La cobertura la presta
+        y la factura {company.data.name}.
+      </p>
+    </div>
+  </div>
 
   <section class="relative overflow-hidden bg-navy-900 text-white">
     <div
@@ -137,19 +183,41 @@ const faq = [
       class="container-page relative grid gap-10 py-12 md:py-16 lg:grid-cols-[1.05fr_26rem] lg:items-start lg:gap-14"
     >
       <div>
-        <CompanyLogo company={company} height={46} onDark decorative eager />
-
-        <p class="mt-6 font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-brand">
-          Información y asesoramiento
+        <p class="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-brand">
+          {site.name} · Asesoramiento independiente
         </p>
+
+        {/*
+          H1 anterior: "Cobertura médica Avalian para vos y tu familia" — escrito
+          en la voz de la compañía, indistinguible del titular de su sitio
+          oficial. El nuevo dice qué hace ESTA página (informar) y deja a la
+          compañía como el tema, no como el emisor.
+        */}
         <h1 class="mt-3 text-3xl leading-[1.12] md:text-5xl">
-          Cobertura médica {company.data.name} para vos y tu familia
+          Información sobre los planes de {company.data.name}
         </h1>
         <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
-          {company.data.summary} Conocé los {plans.length} planes disponibles y recibí la
-          información que necesitás para decidir. Si querés avanzar, te acompañamos en el
-          trámite de alta.
+          Somos {site.name}, asesores independientes en medicina prepaga. Te explicamos
+          qué cubre cada uno de los {plans.length} planes de {company.data.name}, en qué
+          se diferencian y cuál se ajusta a tu caso, para que decidas con la información
+          completa.
         </p>
+
+        {/*
+          El logo de la compañía, etiquetado. No encabeza la página: acompaña a
+          una leyenda que dice explícitamente de quién es la marca y por qué
+          está acá. Un logo suelto arriba de todo es lo que hace leer la página
+          como el sitio oficial de esa marca.
+        */}
+        <div
+          class="mt-7 flex items-center gap-4 rounded-lg border border-white/15 bg-white/5 p-4"
+        >
+          <CompanyLogo company={company} height={34} onDark decorative eager />
+          <p class="text-xs leading-relaxed text-navy-100/75">
+            Marca de {company.data.name}, la compañía que presta la cobertura. Se muestra
+            con fines identificatorios; {site.name} no forma parte de esa compañía.
+          </p>
+        </div>
 
         <ul class="mt-7 flex flex-col gap-3">
           {
@@ -196,7 +264,14 @@ const faq = [
     </div>
   </section>
 
-  <section class="section">
+  {/*
+    Va inmediatamente después del hero, antes de los planes: la respuesta a
+    "¿con quién estoy hablando?" tiene que llegar ANTES de que el visitante
+    empiece a evaluar productos, no después de haber dejado sus datos.
+  */}
+  <WhoIsWho companyName={company.data.name} companyWebsite={company.data.website} />
+
+  <section class="section border-t border-hairline">
     <div class="container-page">
       <h2 class="text-center text-3xl md:text-4xl">
         {plans.length === 1
@@ -265,7 +340,7 @@ const faq = [
                 class="btn btn-primary mt-6 w-full"
                 data-plan-cta={plan.data.name}
               >
-                Pedir información de este plan
+                Consultar por este plan
               </a>
             </article>
           ))
@@ -273,9 +348,10 @@ const faq = [
       </div>
 
       <p class="mt-8 text-center text-xs leading-relaxed text-ink-muted">
-        Los beneficios listados son orientativos y no reemplazan la documentación oficial
-        vigente de {company.data.name}. Las condiciones, carencias y valores definitivos
-        son los del contrato de la compañía.
+        Información elaborada por {site.name} a partir de fuentes públicas, con fines
+        orientativos. No reemplaza la documentación oficial vigente de {company.data.name}:
+        las condiciones, carencias, cartilla y valores definitivos son los que establece el
+        contrato de la compañía, que es quien los define y puede modificarlos.
       </p>
     </div>
   </section>
@@ -283,7 +359,7 @@ const faq = [
   <section class="border-y border-hairline bg-canvas py-14 md:py-20">
     <div class="container-page">
       <h2 class="text-center text-3xl md:text-4xl">
-        Cómo asociarte a {company.data.name}
+        Cómo es el proceso
       </h2>
       <ol class="mx-auto mt-10 grid max-w-4xl gap-8 md:grid-cols-3">
         {
@@ -307,7 +383,7 @@ const faq = [
   <section class="section">
     <div class="container-page grid gap-12 lg:grid-cols-[1fr_26rem] lg:items-start">
       <div>
-        <h2 class="text-3xl md:text-4xl">Preguntas sobre {company.data.name}</h2>
+        <h2 class="text-3xl md:text-4xl">Preguntas frecuentes</h2>
         <div class="mt-8 flex flex-col divide-y divide-hairline border-y border-hairline">
           {
             faq.map((item) => (
@@ -348,7 +424,7 @@ const faq = [
     class="sticky bottom-0 z-40 border-t border-hairline bg-white/95 p-3 backdrop-blur lg:hidden"
   >
     <a href="#consultar" class="btn btn-primary w-full">
-      Pedir información de {company.data.name}
+      Consultar sobre los planes de {company.data.name}
     </a>
   </div>
 </LandingLayout>

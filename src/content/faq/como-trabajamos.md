@@ -4,10 +4,17 @@ order: 1
 items:
   - question: ¿Ustedes son una prepaga?
     answer: >-
-      No. Somos un intermediario independiente que comercializa los planes de las
-      compañías de medicina prepaga que representamos: te asesoramos para elegir y
-      gestionamos el alta. La cobertura y la atención médica las brinda la compañía, y
-      el contrato lo firmás con ella.
+      No. Planes Prepagas es un asesor independiente en medicina prepaga. No somos una
+      empresa de medicina prepaga, no formamos parte de ninguna de las compañías cuyos
+      planes publicamos, no las representamos ni actuamos en su nombre, y este no es el
+      sitio oficial de ninguna de ellas. Lo que hacemos es informarte, comparar
+      alternativas y, si lo pedís, acompañarte en la gestión de la solicitud. La
+      cobertura y la atención médica las brinda la compañía, el contrato lo firmás con
+      ella y es ella quien te factura la cuota.
+  - question: ¿Quién cobra la cuota?
+    answer: >-
+      La compañía de medicina prepaga, siempre. Nosotros no facturamos ni percibimos la
+      cuota, y no te cobramos nada por asesorarte.
   - question: ¿El asesoramiento tiene costo?
     answer: >-
       No. No te cobramos nada por asesorarte ni por gestionar el alta.

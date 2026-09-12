@@ -6,13 +6,14 @@ import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import PlanCard from '@/components/plans/PlanCard.astro';
 import PlanInterestForm from '@/components/plans/PlanInterestForm.astro';
 import UnverifiedDataNotice from '@/components/shared/UnverifiedDataNotice.astro';
+import WhoIsWho from '@/components/shared/WhoIsWho.astro';
 import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 import { site } from '@/config/site';
 import { contactFor } from '@/lib/contact';
 import { buildWhatsAppLink, companyEnquiryMessage } from '@/lib/whatsapp';
 
 /**
- * Una página por compañía representada. Sumar una compañía es agregar un .md en
+ * Una página por compañía sobre la que informamos. Sumar una compañía es agregar un .md en
  * `src/content/companies/` — esta página, su entrada en la home y su sección en
  * /planes salen solas.
  */
@@ -39,8 +40,11 @@ const whatsappHref = buildWhatsAppLink(
 
 const { Content } = await render(company);
 
-// provider = la compañía que presta el servicio; seller = nosotros, que lo
-// comercializamos. Es la misma distinción que hace el footer.
+// provider = la compañía que presta el servicio. Deliberadamente NO se declara
+// `seller`: declararnos vendedores del plan afirma un rol comercial en la
+// operación que no está documentado, y los datos estructurados son una de las
+// fuentes que Google cruza al revisar a un anunciante. Somos quien informa
+// sobre el servicio, no quien lo vende.
 const itemListSchema = {
   '@type': 'ItemList',
   name: `Planes de ${company.data.name}`,
@@ -57,11 +61,6 @@ const itemListSchema = {
         '@type': 'Organization',
         name: company.data.name,
         url: company.data.website,
-      },
-      seller: {
-        '@type': 'Organization',
-        '@id': `${Astro.site}#organization`,
-        name: site.name,
       },
       areaServed: { '@type': 'Country', name: 'Argentina' },
     },
@@ -147,9 +146,20 @@ const schema = {
         cartilla, el esquema de copagos y los beneficios que vas a usar seguido. Acá están
         todos, uno al lado del otro.
       </p>
-      <p class="mt-6 text-sm text-navy-100/70">
-        Planes provistos por <strong class="font-semibold text-white">{company.data.name}</strong>.
-        Gestionamos el alta y te acompañamos en el trámite, sin costo para vos.
+      {/*
+        Aclaración de no-afiliación en el hero, no solo en el pie: esta es la
+        página indexable de la compañía, la que Google ve al revisar el sitio.
+      */}
+      <p
+        class="mt-6 max-w-3xl rounded-lg border border-white/15 bg-white/5 p-4 text-sm leading-relaxed text-navy-100/85"
+      >
+        <strong class="font-semibold text-white">
+          Esta página es de {site.name} y no es el sitio oficial de {company.data.name}.
+        </strong>{' '}
+        Somos asesores independientes: informamos sobre estos planes y te acompañamos en la
+        gestión, sin costo. La cobertura la presta {company.data.name}, que es también
+        quien define las condiciones, factura y cobra la cuota. No formamos parte de esa
+        compañía ni la representamos.
       </p>
       <div class="mt-7 flex flex-wrap items-center gap-3">
         <a href="#consultar" class="btn btn-primary">Consultar un plan</a>
@@ -352,6 +362,8 @@ const schema = {
       </section>
     )
   }
+
+  <WhoIsWho companyName={company.data.name} companyWebsite={company.data.website} />
 
   <section class="border-t border-hairline bg-surface py-12">
     <div class="container-page flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">

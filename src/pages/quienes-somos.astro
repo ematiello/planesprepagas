@@ -1,12 +1,12 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
+import LegalIdentity from '@/components/shared/LegalIdentity.astro';
 
-// TODO: reemplazar por los datos reales del equipo y la trayectoria.
 const values = [
   {
     title: 'Especialización',
-    body: 'Conocemos en profundidad los planes de las compañías que representamos, no de oído.',
+    body: 'Conocemos en profundidad los planes que publicamos: carencias, copagos y letra chica, no de oído.',
   },
   {
     title: 'Claridad',
@@ -21,7 +21,7 @@ const values = [
 
 <BaseLayout
   title="Quiénes somos"
-  description={`${site.name} comercializa planes de medicina prepaga. Te asesoramos para elegir la cobertura que corresponde a tu caso y acompañamos el trámite de alta.`}
+  description={`${site.name} es un asesor independiente en medicina prepaga: no es una prepaga ni forma parte de ninguna. Te informamos sobre las coberturas disponibles y te acompañamos en la gestión ante la compañía que elijas.`}
 >
   <section class="bg-navy-900 text-white">
     <div class="container-page py-16 md:py-24">
@@ -32,9 +32,13 @@ const values = [
         Traducimos una decisión que suele tomarse a ciegas
       </h1>
       <p class="prose-measure mt-5 text-lg leading-relaxed text-navy-100/85">
-        {site.name} comercializa planes de medicina prepaga. Te ayudamos a entender en qué
-        se diferencian, a elegir el que corresponde a tu situación y gestionamos el alta
-        ante la compañía.
+        {site.name} es un asesor independiente en medicina prepaga. Te ayudamos a entender
+        en qué se diferencian los planes disponibles, a elegir el que corresponde a tu
+        situación y te acompañamos en la gestión de la solicitud ante la compañía.
+      </p>
+      <p class="prose-measure mt-4 text-base leading-relaxed text-navy-100/70">
+        No somos una empresa de medicina prepaga y no formamos parte de ninguna. La
+        cobertura la presta —y la factura— la compañía que elijas.
       </p>
     </div>
   </section>
@@ -44,22 +48,35 @@ const values = [
       <div class="prose-measure flex flex-col gap-4 text-base leading-relaxed text-ink-muted">
         <h2 class="text-2xl text-ink">Qué hacemos exactamente</h2>
         <p>
-          Nuestro trabajo es conocer al detalle los planes de las compañías que
-          representamos, entender tu situación concreta y traducir una decisión que suele
-          tomarse a ciegas en una elección entendible.
-        </p>
-        <p>
-          No formamos parte de ninguna de esas compañías: somos un intermediario
-          independiente. La cobertura médica la presta la compañía y el contrato lo firmás
-          con ella. Nosotros intervenimos antes —asesorando— y después —acompañando
-          trámites, cambios de plan y consultas.
-        </p>
-        <p>
-          No te cobramos nada por el asesoramiento: contratar con nuestra intervención no
-          aumenta el valor de la cuota.
+          Nuestro trabajo es conocer al detalle los planes que publicamos, entender tu
+          situación concreta y traducir una decisión que suele tomarse a ciegas en una
+          elección entendible.
         </p>
 
-        {/* TODO: sumar acá trayectoria real, cantidad de asociados, años en el mercado. */}
+        <h2 class="mt-4 text-2xl text-ink">Qué NO somos</h2>
+        <p>
+          No somos una empresa de medicina prepaga. No formamos parte de ninguna de las
+          compañías cuyos planes publicamos, no las representamos, no actuamos en su
+          nombre y ninguna de ellas respalda ni patrocina este sitio. Este no es el sitio
+          oficial de ninguna de esas compañías.
+        </p>
+        <p>
+          La cobertura médica la presta la compañía, el contrato lo firmás con ella y es
+          ella quien te factura y te cobra la cuota. También es la compañía —no nosotros—
+          quien decide si acepta o rechaza cada solicitud de afiliación. Nosotros
+          intervenimos antes, asesorando, y después, acompañando trámites y consultas.
+        </p>
+        <p>
+          No te cobramos nada por el asesoramiento y nuestra intervención no aumenta el
+          valor de la cuota, que la fija la compañía.
+        </p>
+
+        <h2 class="mt-4 text-2xl text-ink">Quién responde por este sitio</h2>
+        <p>
+          Publicamos nuestros datos completos para que sepas con quién estás tratando
+          antes de dejarnos cualquier información:
+        </p>
+        <LegalIdentity />
       </div>
 
       <div class="flex flex-col gap-4">

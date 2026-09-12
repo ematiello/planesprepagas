@@ -4,6 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 import { site } from '@/config/site';
+import LegalIdentity from '@/components/shared/LegalIdentity.astro';
 import { contactFor } from '@/lib/contact';
 import { buildWhatsAppLink, companyEnquiryMessage, genericEnquiryMessage } from '@/lib/whatsapp';
 
@@ -128,6 +129,41 @@ const dedicatedLines = (await getCollection('companies'))
       )
     }
 
+    {/*
+      Las dos líneas, declaradas. El sitio atiende con dos números distintos
+      (el general y el de las campañas publicitarias) y hasta acá esa diferencia
+      no se explicaba en ningún lado: dos teléfonos sin explicación en el mismo
+      dominio se leen como dos empresas distintas, que es justo la incoherencia
+      de identidad que Google revisa.
+    */}
+    <div class="container-page mt-10">
+      <div class="card p-6 md:p-8">
+        <h2 class="font-display text-xl font-extrabold text-navy-900">
+          Nuestras líneas de atención
+        </h2>
+        <p class="prose-measure mt-3 text-sm leading-relaxed text-ink-muted">
+          Atendemos con dos números, los dos a nombre del mismo titular:
+        </p>
+        <ul class="mt-4 flex flex-col gap-3 text-sm text-ink">
+          <li>
+            <a href={site.phones.sales.href} class="font-semibold underline underline-offset-4">
+              {site.phones.sales.label}
+            </a>{' '}
+            — línea general del sitio. Es la que figura en el pie de página, en los
+            legales y en las consultas que llegan por buscadores.
+          </li>
+          <li>
+            <a href={site.campaignLine.href} class="font-semibold underline underline-offset-4">
+              {site.campaignLine.label}
+            </a>{' '}
+            — línea de nuestras campañas publicitarias. Atiende las consultas que llegan
+            desde nuestros anuncios y desde las páginas de campaña ({' '}
+            <code class="text-xs">/lp/</code>), para poder darles seguimiento por separado.
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <div class="container-page mt-10">
       <div class="card p-6 md:p-8">
         <h2 class="font-display text-xl font-extrabold text-navy-900">
@@ -135,8 +171,9 @@ const dedicatedLines = (await getCollection('companies'))
         </h2>
         <p class="prose-measure mt-3 text-sm leading-relaxed text-ink-muted">
           Trabajamos por teléfono, mail y WhatsApp: no hace falta que vengas a ninguna
-          oficina. Todo el trámite de alta, desde la consulta inicial hasta la
-          documentación, se resuelve a distancia y en cualquier punto del país.
+          oficina. Toda la gestión, desde la consulta inicial hasta la documentación, se
+          resuelve a distancia y en cualquier punto del país. Por eso publicamos la
+          localidad del titular y no un domicilio de atención al público.
         </p>
       </div>
     </div>

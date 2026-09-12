@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# paquetes de deploy manual a Hostinger (dist_AAAAMMDD_HHMMSS.zip)
+dist_*.zip
+
 # deps
 node_modules/
 

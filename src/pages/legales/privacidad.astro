@@ -1,23 +1,40 @@
 ---
 import LegalLayout from '@/layouts/LegalLayout.astro';
-import { site } from '@/config/site';
+import { site, identity } from '@/config/site';
+import LegalIdentity from '@/components/shared/LegalIdentity.astro';
 ---
 
 <LegalLayout
   title="Política de privacidad"
   description="Qué datos personales tratamos, con qué finalidad, con quién los compartimos y cómo ejercer tus derechos como titular de los datos."
-  lastUpdated="Febrero de 2026"
+  lastUpdated="Septiembre de 2026"
 >
   <p>
-    Esta política describe cómo <strong>{site.legalName}</strong> ({site.name})
-    trata los datos personales que se recolectan a través de este sitio, en los términos
-    de la Ley N.º 25.326 de Protección de los Datos Personales.
+    Esta política describe cómo <strong>{identity.displayName}</strong>, titular del sitio
+    que opera bajo el nombre comercial <strong>{site.name}</strong>, trata los datos
+    personales que se recolectan a través de este sitio, en los términos de la Ley N.º
+    25.326 de Protección de los Datos Personales.
+  </p>
+  <p>
+    {site.name} es un asesor independiente en medicina prepaga. No es una empresa de
+    medicina prepaga ni forma parte de ninguna de las compañías cuyos planes publica.
   </p>
 
   <h2>Qué datos recolectamos</h2>
   <p>
-    Únicamente los que completás voluntariamente en los formularios de consulta: nombre y
-    apellido, teléfono, provincia y el tipo de cobertura que buscás.
+    Los que completás voluntariamente en los formularios de consulta: nombre y apellido,
+    teléfono, provincia, el tipo de cobertura que buscás, la cantidad de personas a
+    cubrir y tu situación laboral (relación de dependencia, monotributo o particular).
+    Este último dato se usa únicamente para saber si corresponde evaluar una derivación
+    de aportes.
+  </p>
+  <p>
+    Además, cuando llegás desde un anuncio, el sitio lee de la dirección los parámetros
+    de campaña (<code>utm_source</code>, <code>utm_medium</code>,
+    <code>utm_campaign</code>, <code>utm_content</code>, <code>utm_term</code>,
+    <code>gclid</code> y <code>fbclid</code>) y los guarda en el almacenamiento de sesión
+    de tu navegador, para saber de qué aviso proviene la consulta. Se borran al cerrar la
+    pestaña y se adjuntan al final del mensaje de WhatsApp que enviás.
   </p>
   <p>
     <strong>Este sitio no almacena esos datos.</strong> El formulario arma un mensaje y
@@ -56,13 +73,56 @@ import { site } from '@/config/site';
     directamente en los formularios de la compañía y con tu consentimiento expreso.
   </p>
 
-  <h2>Cookies y analítica</h2>
+  {/*
+    ⚠️ Esta sección decía "Actualmente este sitio no utiliza cookies de analítica
+    ni de publicidad" — y era FALSO. El sitio carga Google Tag Manager en todas
+    las páginas (incluida esta), y el contenedor dispara Google Analytics 4, que
+    escribe cookies propias. Cualquiera podía comprobarlo abriendo el inspector,
+    y Google —dueño de las dos herramientas— aún más rápido.
+
+    Una política de privacidad contradicha por el propio código es exactamente
+    el tipo de discrepancia que hunde una apelación. El texto de abajo describe
+    lo que el sitio hace realmente. Si se agregan o quitan etiquetas en GTM,
+    ACTUALIZAR ACÁ TAMBIÉN.
+  */}
+  <h2>Cookies y tecnologías de seguimiento</h2>
   <p>
-    {
-      site.analyticsId
-        ? 'Usamos una herramienta de analítica web para medir el uso agregado del sitio. No la utilizamos para identificarte individualmente.'
-        : 'Actualmente este sitio no utiliza cookies de analítica ni de publicidad.'
-    }
+    Este sitio <strong>sí utiliza cookies y tecnologías de medición</strong>. Las cargamos
+    a través de <strong>Google Tag Manager</strong>, un administrador de etiquetas de
+    Google Ireland Limited que permite activar herramientas de medición sin modificar el
+    código del sitio.
+  </p>
+  <p>Actualmente, mediante ese administrador se encuentra activo:</p>
+  <ul>
+    <li>
+      <strong>Google Analytics 4</strong> (identificador de propiedad
+      <code>G-Z36TMMESD7</code>), que mide de forma estadística cómo se usa el sitio:
+      páginas vistas, origen de la visita, tipo de dispositivo y comportamiento agregado.
+      Instala cookies propias —habitualmente <code>_ga</code> y <code>_ga_&lt;id&gt;</code>—
+      con un identificador aleatorio de navegador. No usamos esa información para
+      identificarte por tu nombre.
+    </li>
+  </ul>
+  <p>
+    En las páginas de campaña (las direcciones que comienzan con <code>/lp/</code>), a las
+    que se llega desde un anuncio, el sitio está preparado para activar además etiquetas
+    de conversión de <strong>Google Ads</strong> y el <strong>píxel de Meta</strong>. Se
+    cargan únicamente si están configuradas; al momento de la última actualización de esta
+    política <strong>ninguna de las dos está activa</strong>.
+  </p>
+  <p>
+    También se utiliza el almacenamiento de sesión del navegador
+    (<code>sessionStorage</code>) para conservar los parámetros de campaña descritos más
+    arriba mientras dura tu visita. No es una cookie y se borra al cerrar la pestaña.
+  </p>
+  <p>
+    Podés bloquear o eliminar las cookies desde la configuración de tu navegador, y
+    oponerte a la medición de Google Analytics instalando el{' '}
+    <a
+      href="https://tools.google.com/dlpage/gaoptout"
+      target="_blank"
+      rel="noopener noreferrer">complemento de inhabilitación que provee Google</a
+    >. El sitio funciona igual sin ellas.
   </p>
 
   <h2>Tus derechos</h2>
@@ -82,12 +142,14 @@ import { site } from '@/config/site';
     normas vigentes en materia de protección de datos personales.
   </p>
 
-  <h2>Responsable</h2>
+  <h2>Responsable del tratamiento</h2>
   <p>
-    {site.legalName}
-    <br />
-    Correo de contacto: <a href={`mailto:${site.email}`}>{site.email}</a>
-    <br />
-    Teléfono: <a href={site.phones.sales.href}>{site.phones.sales.label}</a>
+    El responsable del tratamiento de los datos personales recolectados en este sitio es
+    el titular identificado a continuación.
+  </p>
+  <LegalIdentity title="Responsable del tratamiento de datos" />
+  <p>
+    Para ejercer tus derechos o hacer cualquier consulta sobre esta política, escribinos a{' '}
+    <a href={`mailto:${site.email}`}>{site.email}</a>.
   </p>
 </LegalLayout>

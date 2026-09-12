@@ -11,13 +11,41 @@
 export const site = {
   name: 'Planes Prepagas',
 
-  /** TODO: razón social inscripta, para los textos legales. */
-  legalName: 'planesprepagas.com.ar',
+  /**
+   * Identidad del titular del sitio.
+   *
+   * ⚠️ BLOQUEANTE PARA LA APELACIÓN DE GOOGLE ADS ⚠️
+   *
+   * Google rechazó la cuenta, entre otros motivos, por "ocultar o tergiversar la
+   * identidad de la empresa". Hasta acá el sitio se identificaba con el dominio
+   * ('planesprepagas.com.ar') haciendo de razón social: así figuraba en el
+   * copyright, en el JSON-LD, como Responsable en la política de privacidad y
+   * como Titular en los términos. Un dominio no identifica a nadie.
+   *
+   * El titular opera como PERSONA FÍSICA (monotributo), así que lo que
+   * corresponde publicar es nombre y apellido + CUIT/CUIL + localidad.
+   *
+   * Mientras estos campos estén vacíos, el sitio NO inventa ningún dato: los
+   * bloques de identidad simplemente no se renderizan. Pero la apelación no
+   * debería presentarse así — es exactamente el punto que Google reprocha.
+   *
+   * Datos aportados por el titular (2026-09-11). Verificar que coincidan
+   * EXACTAMENTE con la constancia de inscripción de AFIP antes de apelar: la
+   * apelación adjunta esa constancia como evidencia, y una diferencia de
+   * tipeo entre el sitio y el documento juega en contra en vez de a favor.
+   */
+  legalName: 'Farrell Ercília Noemi',
+  taxId: '27-04455493-0',
+  legalLocation: 'Ciudad Autónoma de Buenos Aires, Argentina',
 
-  tagline: 'Asesores en medicina prepaga. Te ayudamos a elegir la cobertura y gestionamos el alta.',
+  /** Figura bajo la que opera, para los textos legales. */
+  legalForm: 'Persona física (responsable monotributo)',
+
+  tagline:
+    'Asesores independientes en medicina prepaga. Te ayudamos a entender y comparar las coberturas disponibles.',
 
   description:
-    'Te ayudamos a elegir tu cobertura médica: comparamos los planes de las compañías que representamos, te explicamos las diferencias y gestionamos el alta. Asesoramiento sin costo por WhatsApp.',
+    'Planes Prepagas es un asesor independiente en medicina prepaga. Informamos y comparamos los planes de las compañías que publicamos, te explicamos las diferencias y, si lo pedís, te acompañamos en la gestión de la solicitud ante la compañía. No somos una empresa de medicina prepaga. Asesoramiento sin costo por WhatsApp.',
 
   /**
    * Contacto general del sitio: la línea con la que se atienden las páginas que
@@ -40,6 +68,21 @@ export const site = {
     sales: { label: '+54 11 6767-5521', href: 'tel:+541167675521' },
     /** TODO: horario de atención real. */
     hours: 'Lunes a viernes de 9 a 18 h',
+  },
+
+  /**
+   * Línea dedicada a la atención de las landings de campaña (`/lp/[slug]`).
+   *
+   * Es un número DISTINTO del general a propósito: permite separar el volumen
+   * que llega por publicidad paga del que llega por el sitio. Vive acá y no
+   * hardcodeado en la landing porque `/contacto` la declara explícitamente:
+   * dos números en el mismo dominio sin explicación es una de las
+   * incoherencias de identidad que Google señala al revisar un anunciante.
+   */
+  campaignLine: {
+    whatsappNumber: '5491124891888',
+    label: '+54 9 11 2489-1888',
+    href: 'tel:+5491124891888',
   },
 
   email: 'info@planesprepagas.com.ar',
@@ -115,6 +158,27 @@ export const site = {
      */
     googleAdsLabel: '',
   },
+} as const;
+
+/**
+ * Identidad publicable del titular, derivada de `site`.
+ *
+ * Un solo lugar decide cómo se nombra a la empresa en los legales, el
+ * copyright y el JSON-LD, para que no vuelva a pasar que un dominio termine
+ * ocupando el lugar de la razón social en cuatro páginas distintas.
+ *
+ * `isComplete` es false mientras falte cualquiera de los tres datos: los
+ * bloques de identidad lo usan para no renderizar una ficha a medias, que es
+ * peor que no tenerla.
+ */
+export const identity = {
+  isComplete: Boolean(site.legalName && site.taxId && site.legalLocation),
+  /** Cómo se firma el sitio. Cae al nombre comercial si aún no hay datos reales. */
+  displayName: site.legalName || site.name,
+  legalName: site.legalName,
+  taxId: site.taxId,
+  location: site.legalLocation,
+  form: site.legalForm,
 } as const;
 
 /**

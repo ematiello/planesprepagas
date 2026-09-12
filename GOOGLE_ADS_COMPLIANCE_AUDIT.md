@@ -1,3 +1,19 @@
+> ## ⛔ DOCUMENTO SUPERADO — 2026-09-11
+>
+> Esta auditoría (2026-09-09) precedió a la **primera apelación, que Google rechazó**.
+> Se conserva como registro histórico. Dos advertencias al leerla:
+>
+> 1. **Su conclusión ("🟢 bajo riesgo general") era incorrecta.** Auditó solo el sitio y
+>    no los anuncios, donde estaba el problema central: display URLs con el dominio
+>    `www.avalian.com.ar`.
+> 2. **Uno de los cambios que declara ya no existía al apelar.** La sección "Quién es
+>    quién acá" que describe en la sección 1 se eliminó el mismo día en el commit
+>    `bba49a5`, antes de presentar la apelación.
+>
+> **Documento vigente:** `CHECKLIST_PRE_APELACION.md` y el informe de la segunda auditoría.
+
+---
+
 # Auditoría de compliance Google Ads — landing `/lp/avalian/`
 
 Fecha: 2026-09-09

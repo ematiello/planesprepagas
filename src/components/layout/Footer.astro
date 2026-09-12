@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { site, legalNav } from '@/config/site';
+import { site, legalNav, identity } from '@/config/site';
 import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 import { buildWhatsAppLink, genericEnquiryMessage } from '@/lib/whatsapp';
@@ -173,22 +173,46 @@ const ayuda = [
         el contrato, no lo publicado acá. Protege sobre la exactitud de los
         beneficios listados y sobre el uso de marcas de terceros.
       */}
+      {/*
+        Nota de alcance. Decía "las compañías de medicina prepaga que representa":
+        "representar" es una afirmación de vínculo formal con un tercero, y no
+        hay documento que la respalde. Es uno de los motivos por los que Google
+        Ads rechazó la cuenta ("hacer parecer que una empresa cuenta con el
+        respaldo o afiliación de otra marca"). Ahora describe solo la actividad
+        verificable: informar y asesorar.
+      */}
       <p class="max-w-4xl text-xs leading-relaxed text-navy-100/60">
-        {site.name} es un intermediario independiente y no forma parte de las compañías de
-        medicina prepaga que representa. Los planes exhibidos pertenecen a cada compañía,
-        que es quien presta el servicio de salud. Las condiciones, coberturas, carencias y
-        valores definitivos son los que establece el contrato de la compañía. Las marcas y
-        denominaciones citadas pertenecen a sus respectivos titulares y se usan con fines
-        identificatorios.{' '}
+        {site.name} es un asesor independiente en medicina prepaga. No es una empresa de
+        medicina prepaga, no forma parte de las compañías cuyos planes publica, no las
+        representa ni actúa en su nombre, y ninguna de ellas respalda este sitio. Los
+        planes exhibidos pertenecen a cada compañía, que es quien presta el servicio de
+        salud, define las condiciones y percibe la cuota. Las condiciones, coberturas,
+        carencias y valores definitivos son los que establece el contrato de la compañía.
+        Las marcas y denominaciones citadas pertenecen a sus respectivos titulares y se
+        usan con fines identificatorios.{' '}
         <a
           href="/legales/terminos"
           class="underline underline-offset-2 hover:text-white">Términos y condiciones</a
         >.
       </p>
 
-      {/* Sin punto después de legalName: una razón social como "S.R.L." ya lo trae. */}
+      {/*
+        Identidad del titular. Antes acá solo figuraba el dominio haciendo de
+        razón social, que es literalmente no identificar a nadie.
+      */}
+      {
+        identity.isComplete && (
+          <p class="text-xs leading-relaxed text-navy-100/60">
+            Titular del sitio:{' '}
+            <strong class="font-semibold text-navy-100">{identity.legalName}</strong> —
+            CUIT/CUIL {identity.taxId} — {identity.location}. {identity.form}. Atención
+            exclusivamente a distancia.
+          </p>
+        )
+      }
+
       <p class="text-xs text-navy-100/50">
-        © {year} {site.legalName} — Todos los derechos reservados.
+        © {year} {identity.displayName} — Todos los derechos reservados.
       </p>
     </div>
   </div>
