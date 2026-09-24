@@ -149,14 +149,42 @@ export const site = {
     gtmId: 'GTM-NNNXJH88',
     /** TODO: ID del píxel de Meta, solo dígitos (ej: '123456789012345'). */
     metaPixelId: '',
-    /** TODO: ID de conversión de Google Ads ('AW-XXXXXXXXX'). */
-    googleAdsId: '',
     /**
-     * TODO: etiqueta de la acción de conversión de Google Ads (la cadena que
-     * sigue a la barra en `AW-XXXXXXXXX/abcDEF...`). Sin esto, el ID solo no
-     * registra la conversión.
+     * ID de conversión de Google Ads ('AW-XXXXXXXXX').
+     *
+     * Etiqueta de Google de la cuenta de Ads. Carga en TODAS las páginas —no
+     * solo en las landings—, porque el remarketing y las conversiones importadas
+     * necesitan ver la navegación completa, no únicamente la entrada paga.
+     *
+     * Convive con GTM sin duplicar nada: son dos IDs distintos (`AW-` mide Ads,
+     * el contenedor dispara GA4). Lo que no hay que hacer es cargar este mismo
+     * ID también como etiqueta dentro de GTM: ahí sí se contaría dos veces.
+     */
+    googleAdsId: 'AW-18449269281',
+    /**
+     * Etiqueta de una conversión de Google Ads disparada a mano al enviar el
+     * formulario (la cadena que sigue a la barra en `AW-XXXXXXXXX/abcDEF...`).
+     *
+     * Vacía a propósito: el envío del formulario ya lo mide Google Ads por
+     * detección automática (acción 7793471646) y un evento manual sobre el
+     * mismo submit lo contaría dos veces. Los clics a WhatsApp y teléfono van
+     * por `contactConversions`, no por acá.
+     *
+     * Tampoco crear una etiqueta de conversión equivalente dentro de GTM.
      */
     googleAdsLabel: '',
+    /**
+     * Conversiones de Google Ads por clic en los CTA de contacto de las
+     * landings, con la etiqueta completa (`AW-XXXXXXXXX/abcDEF...`). Las mide
+     * `trackContactClicks` (`src/lib/ads-conversion.ts`).
+     *
+     * El envío del formulario no va acá: Google Ads lo mide solo por detección
+     * automática y un evento manual lo duplicaría.
+     */
+    contactConversions: {
+      whatsapp: 'AW-18449269281/biFXCOrGmYQdEKGEpt1E',
+      phone: 'AW-18449269281/xg3vCO3GmYQdEKGEpt1E',
+    },
   },
 } as const;
 

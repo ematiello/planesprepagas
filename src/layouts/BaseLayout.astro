@@ -27,7 +27,7 @@ const ogImage = new URL('/og.jpg', Astro.site).href;
    le declara a Google que ese perfil genérico es nuestro. */
 const sameAs = Object.values(site.social).filter(Boolean);
 
-const { gtmId } = site.tracking;
+const { gtmId, googleAdsId } = site.tracking;
 
 /* Snippet oficial de Google Tag Manager.
  *
@@ -103,6 +103,31 @@ const organizationSchema = {
     {
       gtmId && (
         <script is:inline set:html={gtmSnippet} />
+      )
+    }
+
+    {/* Etiqueta de Google de la cuenta de Ads (gtag.js). También arriba de todo:
+        es la que habilita remarketing y conversiones en todo el sitio, no solo
+        en las landings. Trae su propio gtag.js porque `analyticsId` está vacío
+        a propósito (GA4 se dispara desde GTM). */}
+    {
+      googleAdsId && (
+        <>
+          {!site.analyticsId && (
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`} />
+          )}
+          <script is:inline define:vars={{ googleAdsId }}>
+            window.dataLayer = window.dataLayer || [];
+            if (!window.gtag) {
+              function gtag() {
+                window.dataLayer.push(arguments);
+              }
+              window.gtag = gtag;
+              gtag('js', new Date());
+            }
+            window.gtag('config', googleAdsId);
+          </script>
+        </>
       )
     }
 

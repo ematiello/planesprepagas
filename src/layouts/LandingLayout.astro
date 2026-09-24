@@ -22,7 +22,7 @@ interface Props {
 
 const { title, description, companyName } = Astro.props;
 
-const { gtmId, metaPixelId, googleAdsId } = site.tracking;
+const { gtmId, metaPixelId, googleAdsId, contactConversions } = site.tracking;
 
 /* Snippet oficial de Google Tag Manager.
  *
@@ -49,6 +49,31 @@ const year = new Date().getFullYear();
     {
       gtmId && (
         <script is:inline set:html={gtmSnippet} />
+      )
+    }
+
+    {/* Etiqueta de Google de la cuenta de Ads (gtag.js). Va junto al contenedor
+        y no más abajo: en una landing paga, cada milisegundo de demora es un
+        clic medido de menos. Trae su propio gtag.js porque `analyticsId` está
+        vacío a propósito (GA4 se dispara desde GTM). */}
+    {
+      googleAdsId && (
+        <>
+          {!site.analyticsId && (
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`} />
+          )}
+          <script is:inline define:vars={{ googleAdsId }}>
+            window.dataLayer = window.dataLayer || [];
+            if (!window.gtag) {
+              function gtag() {
+                window.dataLayer.push(arguments);
+              }
+              window.gtag = gtag;
+              gtag('js', new Date());
+            }
+            window.gtag('config', googleAdsId);
+          </script>
+        </>
       )
     }
 
@@ -91,31 +116,6 @@ const year = new Date().getFullYear();
       )
     }
 
-    {/*
-      Google Ads puede ir sin GA4: si no hay analyticsId, este bloque trae su
-      propio gtag.js. Si ya se cargó arriba, solo agrega el config.
-    */}
-    {
-      googleAdsId && (
-        <>
-          {!site.analyticsId && (
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`} />
-          )}
-          <script is:inline define:vars={{ googleAdsId }}>
-            window.dataLayer = window.dataLayer || [];
-            if (!window.gtag) {
-              function gtag() {
-                window.dataLayer.push(arguments);
-              }
-              window.gtag = gtag;
-              gtag('js', new Date());
-            }
-            window.gtag('config', googleAdsId);
-          </script>
-        </>
-      )
-    }
-
     {
       metaPixelId && (
         <script is:inline define:vars={{ metaPixelId }}>
@@ -142,7 +142,11 @@ const year = new Date().getFullYear();
     }
   </head>
 
-  <body class="flex min-h-screen flex-col bg-surface">
+  <body
+    class="flex min-h-screen flex-col bg-surface"
+    data-ads-whatsapp={googleAdsId ? contactConversions.whatsapp : ''}
+    data-ads-phone={googleAdsId ? contactConversions.phone : ''}
+  >
     {
       gtmId && (
         <noscript>
@@ -239,5 +243,16 @@ const year = new Date().getFullYear();
         </p>
       </div>
     </footer>
+
+    {/* Conversiones de Google Ads por clic a WhatsApp y teléfono. Sin ID de Ads
+        o sin etiqueta, el atributo va vacío y el listener no mide nada. */}
+    <script>
+      import { trackContactClicks } from '@/lib/ads-conversion';
+
+      trackContactClicks({
+        whatsapp: document.body.dataset.adsWhatsapp ?? '',
+        phone: document.body.dataset.adsPhone ?? '',
+      });
+    </script>
   </body>
 </html>
