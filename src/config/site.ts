@@ -29,13 +29,14 @@ export const site = {
    * bloques de identidad simplemente no se renderizan. Pero la apelación no
    * debería presentarse así — es exactamente el punto que Google reprocha.
    *
-   * Datos aportados por el titular (2026-09-11). Verificar que coincidan
-   * EXACTAMENTE con la constancia de inscripción de AFIP antes de apelar: la
-   * apelación adjunta esa constancia como evidencia, y una diferencia de
-   * tipeo entre el sitio y el documento juega en contra en vez de a favor.
+   * Datos aportados por el titular (2026-09-30; reemplazan a los del
+   * 2026-09-11). Verificar que coincidan EXACTAMENTE con la constancia de
+   * inscripción de AFIP antes de apelar: la apelación adjunta esa constancia
+   * como evidencia, y una diferencia de tipeo entre el sitio y el documento
+   * juega en contra en vez de a favor.
    */
-  legalName: 'Farrell Ercília Noemi',
-  taxId: '27-04455493-0',
+  legalName: 'Edgardo Matiello',
+  taxId: '20-33603607-1',
   legalLocation: 'Ciudad Autónoma de Buenos Aires, Argentina',
 
   /** Figura bajo la que opera, para los textos legales. */
