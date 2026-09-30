@@ -35,7 +35,7 @@ export const site = {
    * como evidencia, y una diferencia de tipeo entre el sitio y el documento
    * juega en contra en vez de a favor.
    */
-  legalName: 'Edgardo Matiello',
+  legalName: 'Edgardo Emanuel Matiello',
   taxId: '20-33603607-1',
   legalLocation: 'Ciudad Autónoma de Buenos Aires, Argentina',
 
