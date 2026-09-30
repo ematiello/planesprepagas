@@ -38,7 +38,7 @@ Verificado sobre el HTML compilado (`npm run build` + auditoría automática).
 
 - [ ] 🔴 **Deploy a producción.** Todo lo anterior está compilado pero **no publicado**.
       Los deploys son manuales por MCP de Hostinger. Sin esto, Google revisa el sitio viejo.
-- [ ] 🔴 **Verificar los datos de AFIP.** Que "Edgardo Matiello" y el CUIT
+- [ ] 🔴 **Verificar los datos de AFIP.** Que "Edgardo Emanuel Matiello" y el CUIT
       `20-33603607-1` coincidan **carácter por carácter** con la constancia de inscripción.
       La constancia se adjunta como evidencia; una diferencia de tipeo juega en contra.
 - [ ] 🔴 **Corregir los anuncios en la cuenta de Google Ads:**
@@ -53,7 +53,7 @@ Verificado sobre el HTML compilado (`npm run build` + auditoría automática).
   - [ ] Renombrar campañas: prefijo `GADS_Search_PP_…`
   - [ ] `utm_campaign=pp-avalian-info` (antes `avalian-leads`)
 - [ ] 🔴 **Nombre del anunciante en la cuenta** = `Planes Prepagas`, y que el perfil de
-      pagos esté a nombre de Edgardo Matiello con el mismo CUIT. La verificación hoy figura como "EDGARDO EMANUEL MATIELLO": revisar que el sitio y la constancia de AFIP usen el mismo nombre. **DATO A VERIFICAR:**
+      pagos esté a nombre de Edgardo Emanuel Matiello con el mismo CUIT. El sitio ya usa el nombre completo, igual que la verificación ("EDGARDO EMANUEL MATIELLO"). **DATO A VERIFICAR:**
       no tengo acceso a la cuenta para comprobarlo.
 - [ ] 🟡 Confirmar el horario de atención real (hoy publica "lunes a viernes de 9 a 18 h",
       valor que nadie confirmó y que llevaba un TODO en el código).
