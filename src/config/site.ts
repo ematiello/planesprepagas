@@ -23,7 +23,7 @@ export const site = {
    * como Titular en los términos. Un dominio no identifica a nadie.
    *
    * El titular opera como PERSONA FÍSICA (monotributo), así que lo que
-   * corresponde publicar es nombre y apellido + CUIT/CUIL + localidad.
+   * corresponde publicar es nombre y apellido + CUIT/CUIL + domicilio.
    *
    * Mientras estos campos estén vacíos, el sitio NO inventa ningún dato: los
    * bloques de identidad simplemente no se renderizan. Pero la apelación no
@@ -41,13 +41,16 @@ export const site = {
    * Domicilio del titular (2026-10-01; antes solo se publicaba la localidad,
    * CABA). Se publica completo a pedido del titular. No es un local de
    * atención al público: la atención sigue siendo a distancia.
+   *
+   * Se carga solo acá, por partes: el texto que se muestra en el sitio
+   * (`identity.location`) se arma a partir de estos campos, igual que el
+   * JSON-LD, así que no pueden quedar distintos.
    */
   legalAddress: {
     street: 'Leopoldo Lugones 520',
     locality: 'Cruz del Eje',
     region: 'Córdoba',
   },
-  legalLocation: 'Leopoldo Lugones 520, Cruz del Eje, Provincia de Córdoba, Argentina',
 
   /** Figura bajo la que opera, para los textos legales. */
   legalForm: 'Persona física (responsable monotributo)',
@@ -209,13 +212,19 @@ export const site = {
  * bloques de identidad lo usan para no renderizar una ficha a medias, que es
  * peor que no tenerla.
  */
+const { street, locality, region } = site.legalAddress;
+const legalLocation =
+  street && locality && region
+    ? `${street}, ${locality}, Provincia de ${region}, Argentina`
+    : '';
+
 export const identity = {
-  isComplete: Boolean(site.legalName && site.taxId && site.legalLocation),
+  isComplete: Boolean(site.legalName && site.taxId && legalLocation),
   /** Cómo se firma el sitio. Cae al nombre comercial si aún no hay datos reales. */
   displayName: site.legalName || site.name,
   legalName: site.legalName,
   taxId: site.taxId,
-  location: site.legalLocation,
+  location: legalLocation,
   form: site.legalForm,
 } as const;
 
