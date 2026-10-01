@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import LandingLayout from '@/layouts/LandingLayout.astro';
+import BrandLogo from '@/components/shared/BrandLogo.astro';
 import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import LeadForm from '@/components/landing/LeadForm.astro';
 import WhoIsWho from '@/components/shared/WhoIsWho.astro';
@@ -118,25 +119,14 @@ const faq = [
     Avalian y nada más. Ese es, textualmente, el patrón que Google Ads sanciona
     como "hacer parecer que es el sitio oficial de otra marca".
 
-    Ahora el monograma y el nombre propio son lo primero, se ven en TODOS los
+    Ahora nuestro logo (con el nombre escrito) es lo primero, se ven en TODOS los
     breakpoints, y el logo de la compañía no vive en el header: aparece más
     abajo, etiquetado como el tema del que informamos.
   */}
   <header class="border-b border-hairline bg-white">
     <div class="container-page flex items-center justify-between gap-3 py-3">
-      <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} — Inicio`}>
-        <span
-          class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-navy-900 font-display text-sm font-extrabold text-white"
-          aria-hidden="true">PP</span
-        >
-        <span class="leading-tight">
-          <span class="block font-display text-base font-extrabold text-navy-900">
-            {site.name}
-          </span>
-          <span class="block text-[0.65rem] uppercase tracking-[0.14em] text-ink-muted">
-            Asesores independientes
-          </span>
-        </span>
+      <a href="/" class="flex items-center" aria-label={`${site.name} — Inicio`}>
+        <BrandLogo height={52} />
       </a>
       {/* Sin teléfono en el encabezado (2026-10-01): el único canal de la landing
           es el formulario, que abre WhatsApp con la consulta ya escrita. */}

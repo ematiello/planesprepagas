@@ -1,0 +1,32 @@
+---
+import { Image } from 'astro:assets';
+import { site } from '@/config/site';
+import logo from '@/assets/brand/logo-planes-prepagas.png';
+
+/**
+ * Logo de Planes Prepagas (agregado 2026-10-01; reemplaza al monograma "PP").
+ *
+ * El PNG trae fondo transparente y colores navy/turquesa, así que solo se usa
+ * sobre fondos claros. El archivo original está recortado al contenido: el
+ * alto que se pide acá es el alto real del dibujo, sin margen vacío.
+ */
+interface Props {
+  /** Alto de render en px. El ancho lo deduce Astro del aspecto original. */
+  height?: number;
+  class?: string;
+}
+
+const { height = 44, class: className = '' } = Astro.props;
+---
+
+{/* Siempre eager: va en el encabezado, arriba del pliegue. */}
+<Image
+  src={logo}
+  alt={site.name}
+  height={height}
+  densities={[1, 2]}
+  loading="eager"
+  fetchpriority="high"
+  class:list={['w-auto shrink-0', className]}
+  style={`height: ${height}px`}
+/>

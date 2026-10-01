@@ -1,18 +1,10 @@
 ---
 import { site, mainNav, topBarNav } from '@/config/site';
+import BrandLogo from '@/components/shared/BrandLogo.astro';
 
 const currentPath = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
-
-// Iniciales del nombre comercial: derivarlas evita que el monograma quede
-// desfasado si la marca cambia de nombre.
-const monogram = site.name
-  .split(/\s+/)
-  .map((word) => word[0])
-  .join('')
-  .slice(0, 2)
-  .toUpperCase();
 ---
 
 <header class="sticky top-0 z-40 border-b border-hairline bg-surface/95 backdrop-blur">
@@ -37,20 +29,8 @@ const monogram = site.name
   </div>
 
   <div class="container-page flex items-center justify-between gap-4 py-4">
-    <a href="/" class="flex items-center gap-2.5" aria-label={`${site.name} — Inicio`}>
-      {/* Marca provisoria: monograma tipográfico hasta que exista un logo real. */}
-      <span
-        class="grid h-10 w-10 place-items-center rounded-lg bg-navy-900 font-display text-base font-extrabold text-white"
-        aria-hidden="true">{monogram}</span
-      >
-      <span class="leading-tight">
-        <span class="block font-display text-lg font-extrabold text-navy-900"
-          >{site.name}</span
-        >
-        <span class="block text-[0.65rem] uppercase tracking-[0.18em] text-ink-muted"
-          >Asesores en medicina prepaga</span
-        >
-      </span>
+    <a href="/" class="flex items-center" aria-label={`${site.name} — Inicio`}>
+      <BrandLogo height={52} />
     </a>
 
     <nav class="hidden items-center gap-7 lg:flex" aria-label="Navegación principal">
