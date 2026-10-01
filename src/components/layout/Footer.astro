@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { site, legalNav, identity } from '@/config/site';
+import BrandLogo from '@/components/shared/BrandLogo.astro';
 import CompanyLogo from '@/components/shared/CompanyLogo.astro';
 import WhatsAppIcon from '@/components/shared/WhatsAppIcon.astro';
 import { buildWhatsAppLink, genericEnquiryMessage } from '@/lib/whatsapp';
@@ -35,7 +36,11 @@ const companyHref = (id: string) => (id === site.homeCompany ? '/' : `/lp/${id}/
 <footer class="mt-auto bg-navy-900 text-navy-100">
   <div class="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
     <div>
-      <h2 class="font-display text-lg font-extrabold text-white">{site.name}</h2>
+      {/* Recuadro blanco: el logo es navy y turquesa y sobre este fondo no se
+          vería. El alt del logo hace de título de la columna. */}
+      <h2 class="inline-flex rounded-lg bg-white px-3 py-2">
+        <BrandLogo height={40} eager={false} />
+      </h2>
       <p class="mt-3 max-w-xs text-sm leading-relaxed text-navy-100/80">{site.tagline}</p>
 
       <div class="mt-5 flex flex-wrap gap-3">

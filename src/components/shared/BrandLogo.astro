@@ -13,20 +13,21 @@ import logo from '@/assets/brand/logo-planes-prepagas.png';
 interface Props {
   /** Alto de render en px. El ancho lo deduce Astro del aspecto original. */
   height?: number;
+  /** true en el encabezado (arriba del pliegue); en el pie, false para no competir con lo visible. */
+  eager?: boolean;
   class?: string;
 }
 
-const { height = 44, class: className = '' } = Astro.props;
+const { height = 44, eager = true, class: className = '' } = Astro.props;
 ---
 
-{/* Siempre eager: va en el encabezado, arriba del pliegue. */}
 <Image
   src={logo}
   alt={site.name}
   height={height}
   densities={[1, 2]}
-  loading="eager"
-  fetchpriority="high"
+  loading={eager ? 'eager' : 'lazy'}
+  fetchpriority={eager ? 'high' : 'auto'}
   class:list={['w-auto shrink-0', className]}
   style={`height: ${height}px`}
 />

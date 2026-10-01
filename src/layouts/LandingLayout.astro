@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import { site, legalNav, identity } from '@/config/site';
 import { buildOrganizationSchema } from '@/lib/organization-schema';
+import BrandLogo from '@/components/shared/BrandLogo.astro';
 
 /**
  * Layout de las landings de campaña. Difiere del BaseLayout a propósito:
@@ -197,6 +198,7 @@ const year = new Date().getFullYear();
     */}
     <footer class="border-t border-hairline bg-canvas">
       <div class="container-page flex flex-col gap-4 py-8">
+        <BrandLogo height={40} eager={false} class="self-start" />
         <ul class="flex flex-wrap gap-x-6 gap-y-2 text-xs">
           {
             legalNav.map((item) => (
