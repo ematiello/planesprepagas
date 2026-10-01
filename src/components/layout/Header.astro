@@ -26,7 +26,7 @@ const monogram = site.name
           </a>
         ))
       }
-      <span aria-hidden="true" class="text-navy-700">|</span>
+      {topBarNav.length > 0 && <span aria-hidden="true" class="text-navy-700">|</span>}
       <a href={`mailto:${site.email}`} class="transition hover:text-white">
         {site.email}
       </a>
@@ -73,7 +73,7 @@ const monogram = site.name
     </nav>
 
     <div class="flex items-center gap-3">
-      <a href="/planes" class="btn btn-primary hidden sm:inline-flex">Ver planes</a>
+      <a href="/" class="btn btn-primary hidden sm:inline-flex">Ver planes</a>
 
       <button
         type="button"
@@ -110,7 +110,7 @@ const monogram = site.name
         ))
       }
       <li class="py-3 sm:hidden">
-        <a href="/planes" class="btn btn-primary w-full">Ver planes</a>
+        <a href="/" class="btn btn-primary w-full">Ver planes</a>
       </li>
     </ul>
   </nav>

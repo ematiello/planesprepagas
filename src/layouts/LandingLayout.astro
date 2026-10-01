@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css';
 import { site, legalNav, identity } from '@/config/site';
+import { buildOrganizationSchema } from '@/lib/organization-schema';
 
 /**
  * Layout de las landings de campaña. Difiere del BaseLayout a propósito:
@@ -8,9 +9,10 @@ import { site, legalNav, identity } from '@/config/site';
  * - **Sin header de navegación ni footer de links.** La landing recibe tráfico
  *   pago con una intención única; cada link que no sea el CTA es una ruta de
  *   escape que se paga y no convierte.
- * - **`noindex`.** La página SEO de cada compañía es `/companias/[slug]`. Si
- *   esta también se indexara, competirían por el mismo término y Google
- *   repartiría la autoridad entre las dos.
+ * - **`noindex` en `/lp/[slug]`.** Si la landing de Ads se indexara, competiría
+ *   con la versión indexable de la compañía por el mismo término. Hoy esa
+ *   versión es la home (`indexable`), que lleva canonical y el JSON-LD de la
+ *   organización; cuando vuelva el sitio general será `/companias/[slug]`.
  * - **Píxeles de Meta y Google Ads**, que el resto del sitio no carga.
  */
 interface Props {
@@ -18,9 +20,14 @@ interface Props {
   description: string;
   /** Se usa en el aviso legal del pie, que sí es obligatorio. */
   companyName: string;
+  /** true solo en la home: index + canonical + JSON-LD. Las /lp/ quedan noindex. */
+  indexable?: boolean;
 }
 
-const { title, description, companyName } = Astro.props;
+const { title, description, companyName, indexable = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const organizationSchema = indexable ? buildOrganizationSchema(Astro.site) : null;
 
 const { gtmId, metaPixelId, googleAdsId, contactConversions } = site.tracking;
 
@@ -79,8 +86,13 @@ const year = new Date().getFullYear();
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-    {/* Sin canonical y con noindex: la versión indexable es /companias/[slug]. */}
-    <meta name="robots" content="noindex, follow" />
+    {
+      indexable ? (
+        <link rel="canonical" href={canonical} />
+      ) : (
+        <meta name="robots" content="noindex, follow" />
+      )
+    }
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -90,6 +102,7 @@ const year = new Date().getFullYear();
     <meta property="og:locale" content="es_AR" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    {indexable && <meta property="og:url" content={canonical} />}
     {/* noindex no impide que alguien reenvíe el link por WhatsApp: la vista
         previa igual necesita imagen. */}
     <meta property="og:image" content={new URL('/og.jpg', Astro.site).href} />
@@ -138,6 +151,11 @@ const year = new Date().getFullYear();
           window.fbq('init', metaPixelId);
           window.fbq('track', 'PageView');
         </script>
+      )
+    }
+    {
+      organizationSchema && (
+        <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
       )
     }
   </head>
@@ -192,14 +210,23 @@ const year = new Date().getFullYear();
               </li>
             ))
           }
-          <li>
-            <a
-              href="/"
-              class="text-ink-muted underline-offset-4 transition hover:text-navy-900 hover:underline"
-            >
-              Sitio principal
-            </a>
-          </li>
+          {/* Quién está detrás del sitio, a un clic: es lo primero que revisa
+              Google Ads al evaluar la identidad del anunciante. */}
+          {
+            [
+              { label: 'Quiénes somos', href: '/quienes-somos' },
+              { label: 'Contacto', href: '/contacto' },
+            ].map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="text-ink-muted underline-offset-4 transition hover:text-navy-900 hover:underline"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
 
         {/*

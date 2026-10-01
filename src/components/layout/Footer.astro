@@ -18,15 +18,18 @@ const whatsappHref = buildWhatsAppLink(genericEnquiryMessage());
 /* Redes con perfil real cargado en site.ts; las vacías no se listan. */
 const socialLinks = Object.entries(site.social).filter(([, url]) => url);
 
-const institucional = [
-  { label: 'Quiénes somos', href: '/quienes-somos' },
-  { label: 'Planes para empresas', href: '/empresas' },
-];
+/*
+ * Mientras el sitio general está oculto (2026-10-01) solo se listan las
+ * páginas publicadas. Al reactivar una, volver a sumarla: Planes para empresas
+ * (/empresas) iba en institucional y Preguntas frecuentes en ayuda.
+ */
+const institucional = [{ label: 'Quiénes somos', href: '/quienes-somos' }];
 
-const ayuda = [
-  { label: 'Preguntas frecuentes', href: '/preguntas-frecuentes' },
-  { label: 'Contacto', href: '/contacto' },
-];
+const ayuda = [{ label: 'Contacto', href: '/contacto' }];
+
+/* La compañía de la home se enlaza a `/`; el resto, a su landing. Con el sitio
+   general activo, esto vuelve a ser /companias/[slug]. */
+const companyHref = (id: string) => (id === site.homeCompany ? '/' : `/lp/${id}/`);
 ---
 
 <footer class="mt-auto bg-navy-900 text-navy-100">
@@ -83,7 +86,7 @@ const ayuda = [
           companies.map((company) => (
             <li>
               <a
-                href={`/companias/${company.id}`}
+                href={companyHref(company.id)}
                 class="inline-flex transition hover:opacity-80"
                 aria-label={`Planes de ${company.data.name}`}
               >
@@ -92,11 +95,6 @@ const ayuda = [
             </li>
           ))
         }
-        <li class="mt-1">
-          <a href="/planes" class="text-navy-100/80 transition hover:text-white">
-            Ver todos los planes
-          </a>
-        </li>
       </ul>
     </div>
 

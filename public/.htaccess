@@ -13,4 +13,12 @@
   RewriteEngine On
   RewriteCond %{HTTP_HOST} ^planesprepagas\.com\.ar$ [NC]
   RewriteRule ^(.*)$ https://www.planesprepagas.com.ar/$1 [R=301,L]
+
+  # Sitio general oculto (2026-10-01): solo se publican la home (landing de
+  # Avalian), /lp/, /quienes-somos, /contacto y /legales. Las URLs que ya
+  # estaban indexadas van a la home con un 302 —temporal a propósito: estas
+  # páginas vuelven cuando se sumen más compañías, y un 301 queda guardado en
+  # los navegadores. Va después de la regla de www para no encadenar saltos de
+  # host. Al reactivar una página, borrar su entrada de acá.
+  RewriteRule ^(planes|companias|empresas|preguntas-frecuentes|avalian|nuestras-oficinas)(/.*)?$ https://www.planesprepagas.com.ar/ [R=302,L]
 </IfModule>

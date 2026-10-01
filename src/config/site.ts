@@ -49,8 +49,12 @@ export const site = {
     'Planes Prepagas es un asesor independiente en medicina prepaga. Informamos y comparamos los planes de las compañías que publicamos, te explicamos las diferencias y, si lo pedís, te acompañamos en la gestión de la solicitud ante la compañía. No somos una empresa de medicina prepaga. Asesoramiento sin costo por WhatsApp.',
 
   /**
-   * Contacto general del sitio: la línea con la que se atienden las páginas que
-   * no son de ninguna compañía en particular (home, contacto, empresas, footer).
+   * Contacto del sitio: UNA sola línea para todas las páginas.
+   *
+   * Desde 2026-10-01 es la línea de campaña (antes había una general,
+   * +54 11 6767-5521, y otra solo para las landings). Dos números en el mismo
+   * dominio fueron una de las incoherencias de identidad que se le marcaron a
+   * la cuenta de Google Ads, así que se unificó en el número de los anuncios.
    *
    * Cada compañía puede declarar su propio WhatsApp y teléfono en su archivo de
    * `src/content/companies/`; lo que no declare cae acá. La resolución vive en
@@ -60,31 +64,26 @@ export const site = {
 
   /**
    * Número de WhatsApp en formato internacional, solo dígitos.
-   * 54 país + 9 móvil + 11 área + 67675521 → línea 11 6767-5521.
+   * 54 país + 9 móvil + 11 área + 24891888 → línea 11 2489-1888.
    */
-  whatsappNumber: '5491167675521',
+  whatsappNumber: '5491124891888',
 
   phones: {
     /** Mismo número que WhatsApp: un solo contacto para llamadas y chat. */
-    sales: { label: '+54 11 6767-5521', href: 'tel:+541167675521' },
+    sales: { label: '+54 9 11 2489-1888', href: 'tel:+5491124891888' },
     /** TODO: horario de atención real. */
     hours: 'Lunes a viernes de 9 a 18 h',
   },
 
   /**
-   * Línea dedicada a la atención de las landings de campaña (`/lp/[slug]`).
+   * Compañía cuya landing se publica como home (`/`).
    *
-   * Es un número DISTINTO del general a propósito: permite separar el volumen
-   * que llega por publicidad paga del que llega por el sitio. Vive acá y no
-   * hardcodeado en la landing porque `/contacto` la declara explícitamente:
-   * dos números en el mismo dominio sin explicación es una de las
-   * incoherencias de identidad que Google señala al revisar un anunciante.
+   * Mientras el sitio general está oculto (páginas con `_` en src/pages/), la home es la landing
+   * de esta compañía, indexable. `/lp/[slug]` sigue existiendo para los
+   * anuncios. Cuando vuelva el sitio general, se borra este campo y se
+   * restituye `src/pages/_index.astro`.
    */
-  campaignLine: {
-    whatsappNumber: '5491124891888',
-    label: '+54 9 11 2489-1888',
-    href: 'tel:+5491124891888',
-  },
+  homeCompany: 'avalian',
 
   email: 'info@planesprepagas.com.ar',
 
@@ -213,22 +212,19 @@ export const identity = {
 /**
  * Links de navegación principal del header.
  *
- * Las compañías no van acá: se listan en la home y en /planes, y cada una tiene
- * su página en /companias/[slug]. Con pocas compañías, un ítem de menú que
- * despliega una sola opción sobra; si el catálogo crece, corresponde sumar
- * "Compañías" apuntando a un índice.
+ * Reducido a propósito (2026-10-01): el sitio general está oculto y solo se
+ * publican la landing (como home), quiénes somos, contacto y los legales.
+ * Al reactivar una página oculta, quitarle el `_` en `src/pages/` y volver a
+ * sumarla acá. Los ítems que había: Planes (/planes), Empresas (/empresas) y,
+ * en la barra superior, Preguntas frecuentes (/preguntas-frecuentes).
  */
 export const mainNav = [
-  { label: 'Planes', href: '/planes' },
-  { label: 'Empresas', href: '/empresas' },
   { label: 'Quiénes somos', href: '/quienes-somos' },
   { label: 'Contacto', href: '/contacto' },
 ] as const;
 
-/** Links secundarios de la barra superior angosta. */
-export const topBarNav = [
-  { label: 'Preguntas frecuentes', href: '/preguntas-frecuentes' },
-] as const;
+/** Links secundarios de la barra superior angosta. Vacío mientras no haya páginas para listar. */
+export const topBarNav: readonly { label: string; href: string }[] = [];
 
 /** Columna de legales del footer. */
 export const legalNav = [
