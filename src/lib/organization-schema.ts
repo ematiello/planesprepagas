@@ -42,12 +42,14 @@ export function buildOrganizationSchema(siteUrl: URL | undefined) {
     ...(identity.location && {
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Ciudad Autónoma de Buenos Aires',
+        streetAddress: site.legalAddress.street,
+        addressLocality: site.legalAddress.locality,
+        addressRegion: site.legalAddress.region,
         addressCountry: 'AR',
       },
     }),
-    // `areaServed` cubre la zona de cobertura; no hay atención presencial, así que
-    // el domicilio se declara solo a nivel de localidad.
+    // `areaServed` cubre la zona de cobertura: la atención es a distancia, el
+    // domicilio es el del titular y no un local de atención al público.
     areaServed: { '@type': 'Country', name: site.areaServed },
     knowsAbout: ['Medicina prepaga', 'Cobertura médica', 'Planes de salud'],
     ...(sameAs.length > 0 && { sameAs }),

@@ -37,7 +37,17 @@ export const site = {
    */
   legalName: 'Edgardo Emanuel Matiello',
   taxId: '20-33603607-1',
-  legalLocation: 'Ciudad Autónoma de Buenos Aires, Argentina',
+  /**
+   * Domicilio del titular (2026-10-01; antes solo se publicaba la localidad,
+   * CABA). Se publica completo a pedido del titular. No es un local de
+   * atención al público: la atención sigue siendo a distancia.
+   */
+  legalAddress: {
+    street: 'Leopoldo Lugones 520',
+    locality: 'Cruz del Eje',
+    region: 'Córdoba',
+  },
+  legalLocation: 'Leopoldo Lugones 520, Cruz del Eje, Provincia de Córdoba, Argentina',
 
   /** Figura bajo la que opera, para los textos legales. */
   legalForm: 'Persona física (responsable monotributo)',
@@ -88,8 +98,8 @@ export const site = {
   email: 'info@planesprepagas.com.ar',
 
   /**
-   * Sin domicilio a propósito: la atención es solo por teléfono, mail y WhatsApp,
-   * así que el sitio no publica dirección. Zona de cobertura, para el JSON-LD.
+   * Zona de cobertura, para el JSON-LD. La atención es a distancia en todo el
+   * país, más allá del domicilio del titular.
    */
   areaServed: 'AR',
 

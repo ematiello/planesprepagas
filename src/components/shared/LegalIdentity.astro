@@ -28,7 +28,7 @@ const rows = [
   { label: 'CUIT / CUIL', value: identity.taxId },
   { label: 'Condición', value: identity.form },
   { label: 'Nombre comercial', value: site.name },
-  { label: 'Localidad', value: identity.location },
+  { label: 'Domicilio', value: identity.location },
 ];
 ---
 
@@ -79,8 +79,8 @@ const rows = [
 
       {variant === 'full' && (
         <p class="mt-5 border-t border-hairline pt-4 text-xs leading-relaxed text-ink-muted">
-          La atención es exclusivamente a distancia (teléfono, correo y WhatsApp), por eso
-          se publica la localidad y no un domicilio de atención al público.
+          La atención es exclusivamente a distancia (teléfono, correo y WhatsApp): el
+          domicilio publicado es el del titular y no un local de atención al público.
         </p>
       )}
     </div>
