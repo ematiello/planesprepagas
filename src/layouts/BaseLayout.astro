@@ -83,7 +83,12 @@ const organizationSchema = buildOrganizationSchema(Astro.site);
     }
 
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* Favicon: el símbolo "PP+" del logo. favicon.ico queda en la raíz para
+        los navegadores y buscadores que lo piden directo, sin leer estos links. */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
